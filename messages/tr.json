@@ -1,0 +1,33 @@
+{
+  "nav": {
+    "externalLinks": "Dış Bağlantılar",
+    "switchLanguage": "Dili değiştir"
+  },
+  "projects": {
+    "heading": "Projelerim",
+    "viewDetails": "Detayları gör →",
+    "backToProjects": "Projelere geri dön",
+    "viewOnGitHub": "GitHub'da Görüntüle",
+    "liveDemo": "Canlı Demo",
+    "notFound": "Proje bulunamadı",
+    "backToHome": "Projelere geri dön",
+    "previousProjects": "Önceki projeler",
+    "nextProjects": "Sonraki projeler",
+    "goToPosition": "{position}. konuma git"
+  },
+  "skills": {
+    "badge": "Modern web teknolojileri ile daha iyi düşün",
+    "heading": "Modern teknolojilerle uygulama geliştirme.",
+    "subheading": "Hiçbir görevi, son tarihi veya fikri kaçırma."
+  },
+  "encryption": {
+    "heading": "Performans & Güvenlik.",
+    "headingBefore": "Performans",
+    "headingAfter": "Güvenlik.",
+    "badge": "Şifreleme",
+    "description": "Verilerinizi uçtan uca şifrelemeyle koruyun."
+  },
+  "footer": {
+    "rights": "Tüm hakları saklıdır."
+  }
+}

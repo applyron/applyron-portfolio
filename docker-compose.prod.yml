@@ -1,0 +1,44 @@
+services:
+  app:
+    container_name: applyron-portfolio
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:-}
+      APP_DATA_DIR: ${APP_DATA_DIR}
+      APP_UPLOADS_DIR: ${APP_UPLOADS_DIR}
+      ADMIN_SETUP_ENABLED: ${ADMIN_SETUP_ENABLED:-}
+    ports:
+      - "127.0.0.1:${APP_PORT}:3000"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then((response)=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - applyron
+    volumes:
+      - type: bind
+        source: ${APP_DATA_DIR}
+        target: ${APP_DATA_DIR}
+      - type: bind
+        source: ${APP_UPLOADS_DIR}
+        target: ${APP_UPLOADS_DIR}
+
+networks:
+  applyron:
+    external: true

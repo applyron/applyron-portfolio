@@ -1,0 +1,30 @@
+{
+  "name": "Applyron",
+  "title": "Applyron | Yazılım Uzmanınız",
+  "description": "Applyron için çok dilli web tasarım vitrini.",
+  "logoUrl": "/uploads/1774233012876-1f47ad6i0mf.png",
+  "copyright": "Applyron",
+  "navLinks": [
+    {
+      "title": {
+        "en": "About me",
+        "tr": "Hakkımda"
+      },
+      "link": "#about-me"
+    },
+    {
+      "title": {
+        "en": "Skills",
+        "tr": "Yetenekler"
+      },
+      "link": "#skills"
+    },
+    {
+      "title": {
+        "en": "Projects",
+        "tr": "Projeler"
+      },
+      "link": "#projects"
+    }
+  ]
+}

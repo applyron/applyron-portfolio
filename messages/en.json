@@ -1,0 +1,33 @@
+{
+  "nav": {
+    "externalLinks": "External Links",
+    "switchLanguage": "Switch language"
+  },
+  "projects": {
+    "heading": "My Projects",
+    "viewDetails": "View details →",
+    "backToProjects": "Back to projects",
+    "viewOnGitHub": "View on GitHub",
+    "liveDemo": "Live Demo",
+    "notFound": "Project not found",
+    "backToHome": "Back to projects",
+    "previousProjects": "Previous projects",
+    "nextProjects": "Next projects",
+    "goToPosition": "Go to position {position}"
+  },
+  "skills": {
+    "badge": "Think better with modern web technologies",
+    "heading": "Making apps with modern technologies.",
+    "subheading": "Never miss a task, deadline or idea."
+  },
+  "encryption": {
+    "heading": "Performance & security.",
+    "headingBefore": "Performance",
+    "headingAfter": "security.",
+    "badge": "Encryption",
+    "description": "Secure your data with end-to-end encryption."
+  },
+  "footer": {
+    "rights": "All rights reserved."
+  }
+}

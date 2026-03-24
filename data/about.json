@@ -1,0 +1,24 @@
+{
+  "badge": {
+    "en": "Fullstack Developer",
+    "tr": "Fullstack Geliştirici"
+  },
+  "heroTitle": {
+    "en": "Providing the best project experience.",
+    "tr": "En iyi proje deneyimini sunuyoruz."
+  },
+  "heroHighlight": {
+    "en": "the best",
+    "tr": "en iyi"
+  },
+  "description": {
+    "en": "I'm a Full Stack Software Engineer with experience in Website, Mobile, and Software development. Check out my projects and skills.",
+    "tr": "Web Sitesi, Mobil ve Yazılım geliştirme alanlarında deneyimli bir Full Stack Yazılım Mühendisiyim. Projelerimi ve becerilerimi inceleyin."
+  },
+  "ctaText": {
+    "en": "Learn more",
+    "tr": "Daha fazla"
+  },
+  "ctaLink": "https://instagram.com/ahmetfarukturkoglu59",
+  "heroImage": "/hero-bg.svg"
+}

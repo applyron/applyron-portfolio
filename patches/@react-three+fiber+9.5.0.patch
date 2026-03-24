@@ -1,0 +1,156 @@
+diff --git a/node_modules/@react-three/fiber/dist/events-238e0986.cjs.prod.js b/node_modules/@react-three/fiber/dist/events-238e0986.cjs.prod.js
+index f36e01a..41811a3 100644
+--- a/node_modules/@react-three/fiber/dist/events-238e0986.cjs.prod.js
++++ b/node_modules/@react-three/fiber/dist/events-238e0986.cjs.prod.js
+@@ -926,6 +926,38 @@ function createEvents(store) {
+ 
+ const isRenderer = def => !!(def != null && def.render);
+ const context = /* @__PURE__ */React__namespace.createContext(null);
++const createCompatibilityClock = () => {
++  let lastTimestamp = 0;
++  let isRunning = true;
++  return {
++    elapsedTime: 0,
++    oldTime: 0,
++    start() {
++      isRunning = true;
++      lastTimestamp = 0;
++      return this;
++    },
++    stop() {
++      isRunning = false;
++      lastTimestamp = 0;
++      return this;
++    },
++    getDelta() {
++      if (!isRunning) return 0;
++      const now = (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
++      if (lastTimestamp === 0) {
++        lastTimestamp = now;
++        this.oldTime = this.elapsedTime;
++        return 0;
++      }
++      const delta = now - lastTimestamp;
++      lastTimestamp = now;
++      this.oldTime = this.elapsedTime;
++      this.elapsedTime += delta;
++      return delta;
++    }
++  };
++};
+ const createStore = (invalidate, advance) => {
+   const rootStore = traditional.createWithEqualityFn((set, get) => {
+     const position = new THREE__namespace.Vector3();
+@@ -994,7 +1026,7 @@ const createStore = (invalidate, advance) => {
+       linear: false,
+       flat: false,
+       controls: null,
+-      clock: new THREE__namespace.Clock(),
++      clock: createCompatibilityClock(),
+       pointer,
+       mouse: pointer,
+       frameloop: 'always',
+diff --git a/node_modules/@react-three/fiber/dist/events-358c3764.cjs.dev.js b/node_modules/@react-three/fiber/dist/events-358c3764.cjs.dev.js
+index fac8710..6c660b1 100644
+--- a/node_modules/@react-three/fiber/dist/events-358c3764.cjs.dev.js
++++ b/node_modules/@react-three/fiber/dist/events-358c3764.cjs.dev.js
+@@ -926,6 +926,38 @@ function createEvents(store) {
+ 
+ const isRenderer = def => !!(def != null && def.render);
+ const context = /* @__PURE__ */React__namespace.createContext(null);
++const createCompatibilityClock = () => {
++  let lastTimestamp = 0;
++  let isRunning = true;
++  return {
++    elapsedTime: 0,
++    oldTime: 0,
++    start() {
++      isRunning = true;
++      lastTimestamp = 0;
++      return this;
++    },
++    stop() {
++      isRunning = false;
++      lastTimestamp = 0;
++      return this;
++    },
++    getDelta() {
++      if (!isRunning) return 0;
++      const now = (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
++      if (lastTimestamp === 0) {
++        lastTimestamp = now;
++        this.oldTime = this.elapsedTime;
++        return 0;
++      }
++      const delta = now - lastTimestamp;
++      lastTimestamp = now;
++      this.oldTime = this.elapsedTime;
++      this.elapsedTime += delta;
++      return delta;
++    }
++  };
++};
+ const createStore = (invalidate, advance) => {
+   const rootStore = traditional.createWithEqualityFn((set, get) => {
+     const position = new THREE__namespace.Vector3();
+@@ -994,7 +1026,7 @@ const createStore = (invalidate, advance) => {
+       linear: false,
+       flat: false,
+       controls: null,
+-      clock: new THREE__namespace.Clock(),
++      clock: createCompatibilityClock(),
+       pointer,
+       mouse: pointer,
+       frameloop: 'always',
+diff --git a/node_modules/@react-three/fiber/dist/events-5a94e5eb.esm.js b/node_modules/@react-three/fiber/dist/events-5a94e5eb.esm.js
+index 18789b5..185d856 100644
+--- a/node_modules/@react-three/fiber/dist/events-5a94e5eb.esm.js
++++ b/node_modules/@react-three/fiber/dist/events-5a94e5eb.esm.js
+@@ -901,6 +901,38 @@ function createEvents(store) {
+ 
+ const isRenderer = def => !!(def != null && def.render);
+ const context = /* @__PURE__ */React.createContext(null);
++const createCompatibilityClock = () => {
++  let lastTimestamp = 0;
++  let isRunning = true;
++  return {
++    elapsedTime: 0,
++    oldTime: 0,
++    start() {
++      isRunning = true;
++      lastTimestamp = 0;
++      return this;
++    },
++    stop() {
++      isRunning = false;
++      lastTimestamp = 0;
++      return this;
++    },
++    getDelta() {
++      if (!isRunning) return 0;
++      const now = (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000;
++      if (lastTimestamp === 0) {
++        lastTimestamp = now;
++        this.oldTime = this.elapsedTime;
++        return 0;
++      }
++      const delta = now - lastTimestamp;
++      lastTimestamp = now;
++      this.oldTime = this.elapsedTime;
++      this.elapsedTime += delta;
++      return delta;
++    }
++  };
++};
+ const createStore = (invalidate, advance) => {
+   const rootStore = createWithEqualityFn((set, get) => {
+     const position = new THREE.Vector3();
+@@ -969,7 +1001,7 @@ const createStore = (invalidate, advance) => {
+       linear: false,
+       flat: false,
+       controls: null,
+-      clock: new THREE.Clock(),
++      clock: createCompatibilityClock(),
+       pointer,
+       mouse: pointer,
+       frameloop: 'always',
