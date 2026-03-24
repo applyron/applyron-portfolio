@@ -21,6 +21,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -69,10 +72,40 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
-          ssh-keyscan -p "${SSH_PORT}" -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -p "${SSH_PORT}" -H "${DEPLOY_HOST}" >> ~/.ssh/known_hosts
+
+      - name: Debug local files
+        run: |
+          set -euo pipefail
+          pwd
+          ls -la
+          test -f package.json && echo "package.json exists"
+          test -f package-lock.json && echo "package-lock.json exists"
+
+      - name: Ensure remote repo directory
+        run: |
+          set -euo pipefail
+          ssh -p "$SSH_PORT" "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "mkdir -p /srv/apps/${APP_NAME}/repo"
+
+      - name: Sync repository
+        run: |
+          set -euo pipefail
+          REMOTE_DIR="/srv/apps/${APP_NAME}/repo"
+          rsync -azvv --delete \
+            --exclude ".git" \
+            --exclude "node_modules" \
+            --exclude ".next" \
+            ./ "${DEPLOY_USER}@${DEPLOY_HOST}:${REMOTE_DIR}/"
+
+      - name: Debug remote files
+        run: |
+          set -euo pipefail
+          ssh -p "$SSH_PORT" "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "ls -la /srv/apps/${APP_NAME}/repo && find /srv/apps/${APP_NAME}/repo -maxdepth 1 -type f | sort"
 
       - name: Run Applyron Server deploy
         run: |
           set -euo pipefail
-          ssh -p "$SSH_PORT" "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+          ssh -p "$SSH_PORT" "${DEPLOY_USER}@${DEPLOY_HOST}" \
             "/srv/platform/bin/deploy-app ${APP_NAME}"
