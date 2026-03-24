@@ -1,0 +1,97 @@
+name: Deploy to Applyron Server
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: applyron-production
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  APP_NAME: applyron-portfolio
+  ALLOWED_DEPLOY_ACTORS: ahmetfarukturkoglu
+  SSH_PORT: 22
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Validate deploy actor
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          actor_allowed="false"
+          IFS=',' read -ra actors <<< "${ALLOWED_DEPLOY_ACTORS}"
+          for actor in "${actors[@]}"; do
+            actor="$(echo "$actor" | xargs)"
+            if [ "$actor" = "${GITHUB_ACTOR}" ]; then
+              actor_allowed="true"
+              break
+            fi
+          done
+
+          if [ "$actor_allowed" != "true" ]; then
+            echo "Actor ${GITHUB_ACTOR} is not allowed to deploy ${APP_NAME}."
+            exit 1
+          fi
+
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Trust deploy host key
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "${SSH_PORT}" -H "${DEPLOY_HOST}" >> ~/.ssh/known_hosts
+
+      - name: Ensure remote repo directory
+        run: |
+          set -euo pipefail
+          ssh -p "$SSH_PORT" "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "mkdir -p /srv/apps/${APP_NAME}/repo"
+
+      - name: Sync repository
+        run: |
+          set -euo pipefail
+          REMOTE_DIR="/srv/apps/${APP_NAME}/repo"
+          rsync -az --delete \
+            --exclude ".git" \
+            --exclude "node_modules" \
+            --exclude ".next" \
+            ./ "${DEPLOY_USER}@${DEPLOY_HOST}:${REMOTE_DIR}/"
+
+      - name: Run Applyron Server deploy
+        run: |
+          set -euo pipefail
+          ssh -p "$SSH_PORT" "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "/srv/platform/bin/deploy-app ${APP_NAME}"

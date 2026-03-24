@@ -1,0 +1,62 @@
+[
+  {
+    "id": "modern-nextjs-portfolio",
+    "slug": "modern-nextjs-portfolio",
+    "title": {
+      "en": "Modern Next.js Portfolio",
+      "tr": "Modern Next.js Portföyü"
+    },
+    "description": {
+      "en": "Embark on a journey through my professional evolution with the \"Modern Next.js Portfolio\" - a dynamic showcase of my skills, experiences, and passion for web development.",
+      "tr": "\"Modern Next.js Portföyü\" ile profesyonel gelişimim boyunca bir yolculuğa çıkın - becerilerimi, deneyimlerimi ve web geliştirmeye olan tutkumu dinamik bir şekilde sergiliyor."
+    },
+    "longDescription": {
+      "en": "Crafted with precision and powered by Next.js, this portfolio is more than just a static display; it's an immersive experience that reflects the cutting edge of modern web technologies.",
+      "tr": "Next.js ile güçlendirilmiş bu portföy, yalnızca statik bir görüntü değil; modern web teknolojilerinin en ileri noktasını yansıtan sürükleyici bir deneyimdir."
+    },
+    "image": "/projects/project-1.png",
+    "technologies": ["Next.js", "React", "TypeScript", "Tailwind CSS"],
+    "githubUrl": "https://github.com",
+    "demoUrl": "https://example.com"
+  },
+  {
+    "id": "interactive-cards-portfolio",
+    "slug": "interactive-cards-portfolio",
+    "title": {
+      "en": "Interactive Cards Portfolio",
+      "tr": "Etkileşimli Kartlar Portföyü"
+    },
+    "description": {
+      "en": "Step into the extraordinary world of my professional journey through the \"Interactive Cards Portfolio\" - an innovative and visually captivating platform.",
+      "tr": "\"Etkileşimli Kartlar Portföyü\" aracılığıyla profesyonel yolculuğumun olağanüstü dünyasına adım atın - yenilikçi ve görsel açıdan büyüleyici bir platform."
+    },
+    "longDescription": {
+      "en": "Ditching the conventional static layout, this portfolio leverages interactive cards to showcase my skills, projects, and personality in an engaging and dynamic manner.",
+      "tr": "Geleneksel statik düzeni bir kenara bırakarak bu portföy, becerilerimi, projelerimi ve kişiliğimi ilgi çekici ve dinamik bir şekilde sergilemek için etkileşimli kartları kullanıyor."
+    },
+    "image": "/projects/project-2.png",
+    "technologies": ["React", "Framer Motion", "CSS", "JavaScript"],
+    "githubUrl": "https://github.com",
+    "demoUrl": "https://example.com"
+  },
+  {
+    "id": "space-themed-website",
+    "slug": "space-themed-website",
+    "title": {
+      "en": "Space Themed Website",
+      "tr": "Uzay Temalı Web Sitesi"
+    },
+    "description": {
+      "en": "Embark on an interstellar journey with my \"Space Themed Website\", a mesmerizing space-themed website that invites you to explore the cosmic wonders beyond our world.",
+      "tr": "\"Uzay Temalı Web Sitem\" ile yıldızlararası bir yolculuğa çıkın - sizi dünyamızın ötesindeki kozmik harikaları keşfetmeye davet eden büyüleyici bir uzay temalı web sitesi."
+    },
+    "longDescription": {
+      "en": "Immerse yourself in an awe-inspiring digital experience that blends cutting-edge design with the mysteries of the universe.",
+      "tr": "Son teknoloji tasarımı evrenin gizemleriyle harmanlayan nefes kesici bir dijital deneyime kendinizi bırakın."
+    },
+    "image": "/projects/project-3.png",
+    "technologies": ["Three.js", "React", "WebGL", "GSAP"],
+    "githubUrl": "https://github.com",
+    "demoUrl": "https://example.com"
+  }
+]
