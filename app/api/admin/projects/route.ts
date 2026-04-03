@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getProjects, setProjects } from "@/lib/data";
-import { isAuthenticated } from "@/lib/auth";
+import {
+  isAuthenticated,
+  issueAdminSessionToken,
+  jsonWithAdminSession,
+} from "@/lib/auth";
 import { validateProjects } from "@/lib/validate";
 import { getAdminRequestMessages } from "@/lib/admin-i18n-server";
 import { revalidateHomePages, revalidateProjectPages } from "@/lib/revalidate-public";
@@ -12,7 +16,15 @@ export async function GET() {
   if (!(await isAuthenticated())) {
     return NextResponse.json({ error: messages.apiErrors.unauthorized }, { status: 401 });
   }
-  return NextResponse.json(getProjects());
+
+  try {
+    return jsonWithAdminSession(await getProjects(), await issueAdminSessionToken());
+  } catch {
+    return NextResponse.json(
+      { error: messages.apiErrors.authUnavailable },
+      { status: 503 },
+    );
+  }
 }
 
 export async function POST(req: Request) {
@@ -20,16 +32,28 @@ export async function POST(req: Request) {
   if (!(await isAuthenticated())) {
     return NextResponse.json({ error: messages.apiErrors.unauthorized }, { status: 401 });
   }
+
+  let sessionToken: string;
+  try {
+    sessionToken = await issueAdminSessionToken();
+  } catch {
+    return NextResponse.json(
+      { error: messages.apiErrors.authUnavailable },
+      { status: 503 },
+    );
+  }
+
   const projects = await req.json();
   const errors = validateProjects(projects);
   if (errors.length > 0) {
-    return NextResponse.json(
+    return jsonWithAdminSession(
       { error: messages.apiErrors.validationFailed, errors },
+      sessionToken,
       { status: 400 },
     );
   }
-  setProjects(projects);
+  await setProjects(projects);
   revalidateHomePages();
   revalidateProjectPages(projects);
-  return NextResponse.json({ success: true });
+  return jsonWithAdminSession({ success: true }, sessionToken);
 }

@@ -29,6 +29,8 @@ export const SkillDataProvider = ({
   };
 
   const animationDelay = 0.1;
+  const responsiveWidth = `clamp(${Math.max(40, Math.round(width * 0.5))}px, 14vw, ${width}px)`;
+  const responsiveHeight = `clamp(${Math.max(40, Math.round(height * 0.5))}px, 14vw, ${height}px)`;
 
   return (
     <motion.div
@@ -39,12 +41,15 @@ export const SkillDataProvider = ({
       custom={index}
       transition={{ delay: index * animationDelay }}
     >
-      <div className="relative" style={{ width, height }}>
+      <div
+        className="relative shrink-0"
+        style={{ width: responsiveWidth, height: responsiveHeight }}
+      >
         <Image
           src={`/skills/${src}`}
           alt={name}
           fill
-          sizes={`${width}px`}
+          sizes="(min-width: 1024px) 96px, (min-width: 640px) 72px, 56px"
           className="object-contain"
           draggable={false}
         />

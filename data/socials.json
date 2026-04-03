@@ -1,8 +1,8 @@
 {
   "navbar": [
     {
-      "id": "1774229253165",
-      "name": "İnstagram",
+      "id": "instagram",
+      "name": "Instagram",
       "icon": "RxInstagramLogo",
       "link": "https://instagram.com/applyron"
     }

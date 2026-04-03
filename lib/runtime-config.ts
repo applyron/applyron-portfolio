@@ -30,10 +30,36 @@ export function getUploadFilePath(filename: string): string {
   return path.join(getUploadsDir(), path.basename(filename));
 }
 
+function resolveOptionalConfiguredPath(
+  envName: "ADMIN_JWT_SECRET_FILE",
+): string | undefined {
+  const configured = process.env[envName]?.trim();
+  if (!configured) {
+    return undefined;
+  }
+
+  return path.isAbsolute(configured)
+    ? configured
+    : path.resolve(/* turbopackIgnore: true */ process.cwd(), configured);
+}
+
+export function isProductionRuntime(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+export function getRedisUrl(): string | undefined {
+  const configured = process.env.REDIS_URL?.trim();
+  return configured ? configured : undefined;
+}
+
+export function getAdminJwtSecretFilePath(): string | undefined {
+  return resolveOptionalConfiguredPath("ADMIN_JWT_SECRET_FILE");
+}
+
 export function isAdminSetupEnabled(authConfigured = false): boolean {
   const configured = process.env.ADMIN_SETUP_ENABLED?.trim();
   if (!configured) {
-    return process.env.NODE_ENV !== "production" || !authConfigured;
+    return !isProductionRuntime() || !authConfigured;
   }
 
   return /^(1|true|yes|on)$/i.test(configured);

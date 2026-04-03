@@ -1,9 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
+
 import type { ExternalLink } from "@/lib/data";
+import { validateLinks } from "@/lib/validate";
+
 import IconPicker from "../IconPicker";
 import { useAdminI18n } from "../AdminI18nProvider";
+import {
+  type AdminTabProps,
+  getAdminErrorMessage,
+  useDirtyTracker,
+} from "./tab-utils";
 
 const EMPTY_LINK = (): ExternalLink => ({
   id: Date.now().toString(),
@@ -12,21 +20,56 @@ const EMPTY_LINK = (): ExternalLink => ({
   url: "",
 });
 
-export default function LinksTab() {
+export default function LinksTab({
+  onDirtyChange,
+  onUnauthorized,
+}: AdminTabProps) {
   const [links, setLinks] = useState<ExternalLink[]>([]);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
   const { messages } = useAdminI18n();
+  const { currentSnapshot, setCleanSnapshot } = useDirtyTracker(
+    links,
+    onDirtyChange,
+  );
+
+  const loadLinks = useEffectEvent(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/links", { cache: "no-store" });
+      const payload = await response.json().catch(() => null);
+
+      if (response.status === 401) {
+        onUnauthorized?.();
+        return;
+      }
+
+      if (!response.ok) {
+        setError(getAdminErrorMessage(payload, messages.links.loadError));
+        return;
+      }
+
+      if (validateLinks(payload).length > 0) {
+        setError(messages.links.loadError);
+        return;
+      }
+
+      setLinks(payload);
+      setCleanSnapshot(JSON.stringify(payload));
+    } catch {
+      setError(messages.links.loadError);
+    } finally {
+      setLoading(false);
+    }
+  });
 
   useEffect(() => {
-    fetch("/api/admin/links")
-      .then((response) => response.json())
-      .then(setLinks)
-      .catch(() => {
-        setError(messages.links.loadError);
-      });
-  }, [messages.links.loadError]);
+    void loadLinks();
+  }, []);
 
   function update(id: string, field: keyof ExternalLink, value: string) {
     setLinks((prev) =>
@@ -51,18 +94,30 @@ export default function LinksTab() {
       });
       const payload = await response.json().catch(() => null);
 
-      if (!response.ok) {
-        setError(payload?.error || messages.links.saveError);
+      if (response.status === 401) {
+        onUnauthorized?.();
+        return;
+      }
+
+      if (!response.ok || payload?.success !== true) {
+        setError(getAdminErrorMessage(payload, messages.links.saveError));
         return;
       }
 
       setSaved(true);
+      setCleanSnapshot(currentSnapshot);
       setTimeout(() => setSaved(false), 3000);
     } catch {
       setError(messages.links.saveError);
     } finally {
       setSaving(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="text-gray-400 animate-pulse">{messages.common.loading}</div>
+    );
   }
 
   return (
@@ -107,7 +162,9 @@ export default function LinksTab() {
               <IconPicker
                 value={link.icon}
                 onChange={(iconId) => {
-                  if (iconId) update(link.id, "icon", iconId);
+                  if (iconId) {
+                    update(link.id, "icon", iconId);
+                  }
                 }}
               />
             </div>

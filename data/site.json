@@ -7,8 +7,8 @@
   "navLinks": [
     {
       "title": {
-        "en": "About me",
-        "tr": "Hakkımda"
+        "en": "About",
+        "tr": "Hakkımızda"
       },
       "link": "#about-me"
     },
@@ -25,6 +25,13 @@
         "tr": "Projeler"
       },
       "link": "#projects"
+    },
+    {
+      "title": {
+        "en": "Contact",
+        "tr": "İletişim"
+      },
+      "link": "/contact"
     }
   ]
 }

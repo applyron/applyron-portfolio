@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "clean": "node -e \"const fs=require('node:fs'); ['.next','out','output','.playwright-cli','coverage','.eslintcache'].forEach((path)=>fs.rmSync(path,{recursive:true,force:true}));\"",
+    "clean": "node scripts/clean.cjs",
+    "clean:ci": "node scripts/clean.cjs --ci",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint app components constants i18n lib scripts eslint.config.mjs next.config.js postcss.config.js tailwind.config.ts proxy.ts",
     "postinstall": "patch-package"
   },
   "description": "Applyron Web Design, Next.js 16 tabanlı çok dilli portföy ve yönetim paneli.",
@@ -33,6 +34,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
+    "file-type": "^21.3.4",
     "framer-motion": "^12.38.0",
     "jsonwebtoken": "^9.0.3",
     "next": "16.2.0",
@@ -41,6 +43,7 @@
     "react-dom": "19.2.4",
     "react-icons": "^5.6.0",
     "react-intersection-observer": "^10.0.3",
+    "redis": "^5.11.0",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.5.0",
     "three": "^0.183.2"

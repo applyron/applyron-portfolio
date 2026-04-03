@@ -1,8 +1,10 @@
-import { access, mkdir, readFile } from "fs/promises";
+import { access, mkdir } from "fs/promises";
 import { constants } from "fs";
 import { NextResponse } from "next/server";
 
-import { getDataDir, getDataFilePath, getUploadsDir } from "@/lib/runtime-config";
+import { getJwtSecretStatus } from "@/lib/auth";
+import { checkRedisHealth } from "@/lib/redis";
+import { getDataDir, getUploadsDir } from "@/lib/runtime-config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,55 +30,27 @@ async function ensureWritableDirectory(dirPath: string): Promise<CheckResult> {
   }
 }
 
-async function checkJwtSecret(): Promise<CheckResult> {
-  const authPath = getDataFilePath("auth.json");
-  const secretPath = getDataFilePath(".jwt_secret");
-
-  let authConfigured = false;
-
-  try {
-    const authRaw = await readFile(authPath, "utf-8");
-    const auth = JSON.parse(authRaw) as { password?: unknown };
-    authConfigured =
-      typeof auth.password === "string" && auth.password.trim().length > 0;
-  } catch {
-    authConfigured = false;
-  }
-
-  if (!authConfigured) {
-    return {
-      ok: true,
-    };
-  }
-
-  try {
-    const secret = (await readFile(secretPath, "utf-8")).trim();
-    if (secret.length < 32) {
-      throw new Error("JWT secret is shorter than expected");
-    }
-
-    return {
-      ok: true,
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      error: error instanceof Error ? error.message : "JWT secret check failed",
-    };
-  }
+async function checkJwtSecret(): Promise<CheckResult & { source?: string }> {
+  const status = await getJwtSecretStatus();
+  return {
+    ok: status.ok,
+    error: status.error,
+    source: status.source,
+  };
 }
 
 export async function GET() {
   const dataDir = getDataDir();
   const uploadsDir = getUploadsDir();
 
-  const [dataCheck, uploadsCheck, jwtSecretCheck] = await Promise.all([
+  const [dataCheck, uploadsCheck, jwtSecretCheck, redisCheck] = await Promise.all([
     ensureWritableDirectory(dataDir),
     ensureWritableDirectory(uploadsDir),
     checkJwtSecret(),
+    checkRedisHealth(),
   ]);
 
-  const ok = dataCheck.ok && uploadsCheck.ok && jwtSecretCheck.ok;
+  const ok = dataCheck.ok && uploadsCheck.ok && jwtSecretCheck.ok && redisCheck.ok;
   const isProduction = process.env.NODE_ENV === "production";
 
   return NextResponse.json(
@@ -96,6 +70,7 @@ export async function GET() {
             dataDir: dataCheck,
             uploadsDir: uploadsCheck,
             jwtSecret: jwtSecretCheck,
+            redis: redisCheck,
           },
         },
     {

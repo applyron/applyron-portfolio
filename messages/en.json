@@ -1,10 +1,16 @@
 {
   "nav": {
     "externalLinks": "External Links",
-    "switchLanguage": "Switch language"
+    "switchLanguage": "Switch language",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "logoAlt": "{siteName} logo"
+  },
+  "hero": {
+    "imageAlt": "Applyron hero illustration"
   },
   "projects": {
-    "heading": "My Projects",
+    "heading": "Projects",
     "viewDetails": "View details →",
     "backToProjects": "Back to projects",
     "viewOnGitHub": "View on GitHub",
@@ -13,12 +19,21 @@
     "backToHome": "Back to projects",
     "previousProjects": "Previous projects",
     "nextProjects": "Next projects",
-    "goToPosition": "Go to position {position}"
+    "goToPosition": "Go to position {position}",
+    "carouselRegion": "Projects carousel",
+    "swipeHint": "Swipe to browse projects"
   },
   "skills": {
     "badge": "Think better with modern web technologies",
     "heading": "Making apps with modern technologies.",
-    "subheading": "Never miss a task, deadline or idea."
+    "subheading": "Never miss a task, deadline or idea.",
+    "categories": {
+      "core": "Core",
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "fullstack": "Full Stack",
+      "other": "Other"
+    }
   },
   "encryption": {
     "heading": "Performance & security.",
@@ -27,7 +42,46 @@
     "badge": "Encryption",
     "description": "Secure your data with end-to-end encryption."
   },
+  "contactPage": {
+    "metaTitle": "Contact | Applyron",
+    "metaDescription": "Share a short summary for a new page, redesign, or website improvement. Relevant follow-up is planned through the phone number you provide.",
+    "panelTitle": "Contact",
+    "panelDescription": "If you prefer a different channel, you can use the links below.",
+    "responseNote": "If the request is relevant, follow-up is planned through the phone number you provide.",
+    "form": {
+      "title": "Send your request",
+      "description": "A short and clear summary is enough to get started.",
+      "nameLabel": "Full name",
+      "namePlaceholder": "Your name and surname",
+      "phoneLabel": "Phone number",
+      "phonePlaceholder": "+1 415 555 0137",
+      "phoneHint": "Follow-up is planned through this number.",
+      "messageLabel": "Request summary",
+      "messagePlaceholder": "Briefly explain the need, the goal, and any timing considerations.",
+      "submit": "Send request",
+      "submitting": "Sending...",
+      "helper": "Your details are used only to review the request.",
+      "validation": "Please complete your name, phone number, and request summary correctly.",
+      "error": "The request could not be sent. Please try again.",
+      "success": "Your request is in. If it looks relevant, Applyron will plan follow-up through your phone number."
+    }
+  },
   "footer": {
     "rights": "All rights reserved."
+  },
+  "notFoundPage": {
+    "title": "This page could not be found.",
+    "description": "The route you asked for is missing, moved, or was never published. Use the main navigation to keep exploring Applyron.",
+    "projectTitle": "That project page is not available.",
+    "projectDescription": "The requested project detail is missing or no longer published. You can return to the project showcase or contact Applyron directly.",
+    "primaryCta": "Back to the main experience",
+    "secondaryCta": "Open contact page"
+  },
+  "errorPage": {
+    "title": "This page hit an unexpected problem.",
+    "description": "The request failed inside the current route. Retry the page or move to a stable part of the site.",
+    "retry": "Retry",
+    "home": "Back to home",
+    "contact": "Contact Applyron"
   }
 }

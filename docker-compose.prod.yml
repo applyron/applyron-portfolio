@@ -1,4 +1,22 @@
 services:
+  redis:
+    container_name: applyron-portfolio-redis
+    image: redis:7.4-bookworm
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - applyron
+    volumes:
+      - type: volume
+        source: redis-data
+        target: /data
+
   app:
     container_name: applyron-portfolio
     build:
@@ -10,13 +28,21 @@ services:
       NODE_ENV: production
       PORT: 3000
       HOSTNAME: 0.0.0.0
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-}
+      ADMIN_JWT_SECRET_FILE: ${ADMIN_JWT_SECRET_FILE:-}
       APP_PUBLIC_URL: ${APP_PUBLIC_URL:-}
       APP_DATA_DIR: ${APP_DATA_DIR}
       APP_UPLOADS_DIR: ${APP_UPLOADS_DIR}
       ADMIN_SETUP_ENABLED: ${ADMIN_SETUP_ENABLED:-}
+    depends_on:
+      redis:
+        condition: service_healthy
     ports:
       - "127.0.0.1:${APP_PORT}:3000"
     restart: unless-stopped
+    stop_signal: SIGTERM
+    stop_grace_period: 15s
     healthcheck:
       test:
         [
@@ -42,3 +68,6 @@ services:
 networks:
   applyron:
     external: true
+
+volumes:
+  redis-data:

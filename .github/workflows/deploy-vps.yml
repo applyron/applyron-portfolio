@@ -1,6 +1,7 @@
 name: Deploy to Applyron Server
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -16,6 +17,10 @@ env:
   APP_NAME: applyron-portfolio
   ALLOWED_DEPLOY_ACTORS: ahmetfarukturkoglu
   SSH_PORT: 22
+  REMOTE_APP_DIR: /srv/apps/applyron-portfolio
+  REMOTE_STACK_DIR: /opt/stacks/applyron-portfolio
+  REMOTE_ENV_FILE: /srv/apps/applyron-portfolio/shared/.env.production
+  HEALTHCHECK_TIMEOUT: 120
 
 jobs:
   deploy:
@@ -24,6 +29,7 @@ jobs:
     env:
       DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_HOST_ED25519_FINGERPRINT: ${{ vars.DEPLOY_HOST_ED25519_FINGERPRINT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -68,11 +74,35 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
 
-      - name: Trust deploy host key
+      - name: Verify and trust deploy host key
         run: |
           set -euo pipefail
+
+          if [ -z "${DEPLOY_HOST_ED25519_FINGERPRINT}" ]; then
+            echo "DEPLOY_HOST_ED25519_FINGERPRINT is required."
+            exit 1
+          fi
+
           mkdir -p ~/.ssh
-          ssh-keyscan -p "${SSH_PORT}" -H "${DEPLOY_HOST}" >> ~/.ssh/known_hosts
+          chmod 700 ~/.ssh
+
+          ssh-keyscan -p "${SSH_PORT}" -t ed25519 "${DEPLOY_HOST}" > /tmp/deploy_host_ed25519.pub
+
+          if [ ! -s /tmp/deploy_host_ed25519.pub ]; then
+            echo "Failed to read deploy host ed25519 key."
+            exit 1
+          fi
+
+          scanned_fingerprint="$(ssh-keygen -lf /tmp/deploy_host_ed25519.pub -E sha256 | awk 'NR==1 {print $2}')"
+
+          if [ "${scanned_fingerprint}" != "${DEPLOY_HOST_ED25519_FINGERPRINT}" ]; then
+            echo "Deploy host fingerprint mismatch."
+            echo "Expected: ${DEPLOY_HOST_ED25519_FINGERPRINT}"
+            echo "Actual:   ${scanned_fingerprint}"
+            exit 1
+          fi
+
+          cat /tmp/deploy_host_ed25519.pub >> ~/.ssh/known_hosts
 
       - name: Ensure remote repo directory
         run: |
@@ -83,15 +113,127 @@ jobs:
       - name: Sync repository
         run: |
           set -euo pipefail
-          REMOTE_DIR="/srv/apps/${APP_NAME}/repo"
+          REMOTE_DIR="${REMOTE_APP_DIR}/repo"
           rsync -az --delete \
+            -e "ssh -p ${SSH_PORT}" \
             --exclude ".git" \
             --exclude "node_modules" \
             --exclude ".next" \
+            --exclude ".playwright-cli" \
+            --exclude ".local" \
+            --exclude "output" \
+            --exclude "coverage" \
+            --exclude "tsconfig.tsbuildinfo" \
             ./ "${DEPLOY_USER}@${DEPLOY_HOST}:${REMOTE_DIR}/"
 
-      - name: Run Applyron Server deploy
+      - name: Deploy release through Dockge stack
         run: |
           set -euo pipefail
           ssh -p "$SSH_PORT" "${DEPLOY_USER}@${DEPLOY_HOST}" \
-            "/srv/platform/bin/deploy-app ${APP_NAME}"
+            "APP_NAME='${APP_NAME}' REMOTE_APP_DIR='${REMOTE_APP_DIR}' REMOTE_STACK_DIR='${REMOTE_STACK_DIR}' REMOTE_ENV_FILE='${REMOTE_ENV_FILE}' HEALTHCHECK_TIMEOUT='${HEALTHCHECK_TIMEOUT}' bash -s" <<'REMOTE_SCRIPT'
+          set -euo pipefail
+
+          APP_DIR="${REMOTE_APP_DIR}"
+          REPO_DIR="${APP_DIR}/repo"
+          RELEASES_DIR="${APP_DIR}/releases"
+          CURRENT_LINK="${APP_DIR}/current"
+          PREVIOUS_LINK="${APP_DIR}/previous"
+          APP_ENV_FILE="${REMOTE_ENV_FILE}"
+          STACK_DIR="${REMOTE_STACK_DIR}"
+          STACK_COMPOSE="${STACK_DIR}/compose.yaml"
+          LOG_FILE="/srv/platform/logs/deploy-${APP_NAME}.log"
+          RELEASE_ID="$(date -u +%Y%m%dT%H%M%SZ)"
+          RELEASE_DIR="${RELEASES_DIR}/${RELEASE_ID}"
+          PREV_TARGET=""
+          CUTOVER_STARTED="false"
+
+          rollback() {
+            if [[ -z "${PREV_TARGET}" ]]; then
+              echo "Rollback skipped: previous release is not available." >&2
+              return 1
+            fi
+
+            ln -sfn "${PREV_TARGET}" "${CURRENT_LINK}"
+            docker compose --project-name "${APP_NAME}" -f "${STACK_COMPOSE}" up -d --build --remove-orphans
+          }
+
+          rollback_on_error() {
+            if [[ "${CUTOVER_STARTED}" = "true" ]]; then
+              echo "Deploy failed after cutover. Rolling back ${APP_NAME}." >&2
+              rollback || true
+            fi
+          }
+
+          trap rollback_on_error ERR
+
+          if [[ ! -d "${REPO_DIR}" ]]; then
+            echo "Missing repo directory: ${REPO_DIR}" >&2
+            exit 1
+          fi
+
+          if [[ ! -f "${REPO_DIR}/package.json" || ! -f "${REPO_DIR}/package-lock.json" ]]; then
+            echo "Repository sync is incomplete in ${REPO_DIR}." >&2
+            exit 1
+          fi
+
+          if [[ ! -f "${APP_ENV_FILE}" ]]; then
+            echo "Missing app environment file: ${APP_ENV_FILE}" >&2
+            exit 1
+          fi
+
+          if [[ ! -f "${STACK_COMPOSE}" ]]; then
+            echo "Missing Dockge stack file: ${STACK_COMPOSE}" >&2
+            exit 1
+          fi
+
+          mkdir -p "${RELEASE_DIR}"
+
+          {
+            echo "[$(date -u +%FT%TZ)] Starting deploy for ${APP_NAME}"
+
+            rsync -az --delete \
+              --exclude ".git" \
+              --exclude "node_modules" \
+              --exclude ".next" \
+              --exclude ".playwright-cli" \
+              --exclude ".local" \
+              --exclude "output" \
+              --exclude "coverage" \
+              --exclude "tsconfig.tsbuildinfo" \
+              "${REPO_DIR}/" "${RELEASE_DIR}/"
+
+            ln -sfn "${APP_ENV_FILE}" "${RELEASE_DIR}/.env.production"
+
+            if [[ -L "${CURRENT_LINK}" ]]; then
+              PREV_TARGET="$(readlink -f "${CURRENT_LINK}")"
+              ln -sfn "${PREV_TARGET}" "${PREVIOUS_LINK}"
+            fi
+
+            ln -sfn "${RELEASE_DIR}" "${CURRENT_LINK}"
+            CUTOVER_STARTED="true"
+
+            set -a
+            source "${APP_ENV_FILE}"
+            set +a
+
+            docker compose --project-name "${APP_NAME}" -f "${STACK_COMPOSE}" config -q
+            docker compose --project-name "${APP_NAME}" -f "${STACK_COMPOSE}" up -d --build --remove-orphans
+
+            HEALTH_URL="http://127.0.0.1:${APP_PORT}/api/health"
+            deadline=$((SECONDS + HEALTHCHECK_TIMEOUT))
+
+            until curl -fsS "${HEALTH_URL}" >/dev/null 2>&1; do
+              if (( SECONDS >= deadline )); then
+                echo "Healthcheck failed for ${APP_NAME} at ${HEALTH_URL}" >&2
+                rollback
+                CUTOVER_STARTED="false"
+                exit 1
+              fi
+              sleep 5
+            done
+
+            echo "[$(date -u +%FT%TZ)] Deploy completed for ${APP_NAME}"
+            CUTOVER_STARTED="false"
+            trap - ERR
+          } | tee -a "${LOG_FILE}"
+REMOTE_SCRIPT

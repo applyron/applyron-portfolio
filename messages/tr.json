@@ -1,10 +1,16 @@
 {
   "nav": {
     "externalLinks": "Dış Bağlantılar",
-    "switchLanguage": "Dili değiştir"
+    "switchLanguage": "Dili değiştir",
+    "openMenu": "Menüyü aç",
+    "closeMenu": "Menüyü kapat",
+    "logoAlt": "{siteName} logosu"
+  },
+  "hero": {
+    "imageAlt": "Applyron hero görseli"
   },
   "projects": {
-    "heading": "Projelerim",
+    "heading": "Projeler",
     "viewDetails": "Detayları gör →",
     "backToProjects": "Projelere geri dön",
     "viewOnGitHub": "GitHub'da Görüntüle",
@@ -13,12 +19,21 @@
     "backToHome": "Projelere geri dön",
     "previousProjects": "Önceki projeler",
     "nextProjects": "Sonraki projeler",
-    "goToPosition": "{position}. konuma git"
+    "goToPosition": "{position}. konuma git",
+    "carouselRegion": "Projeler karuseli",
+    "swipeHint": "Projeleri görmek için kaydır"
   },
   "skills": {
     "badge": "Modern web teknolojileri ile daha iyi düşün",
     "heading": "Modern teknolojilerle uygulama geliştirme.",
-    "subheading": "Hiçbir görevi, son tarihi veya fikri kaçırma."
+    "subheading": "Hiçbir görevi, son tarihi veya fikri kaçırma.",
+    "categories": {
+      "core": "Temel Yetenekler",
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "fullstack": "Full Stack",
+      "other": "Diğer"
+    }
   },
   "encryption": {
     "heading": "Performans & Güvenlik.",
@@ -27,7 +42,46 @@
     "badge": "Şifreleme",
     "description": "Verilerinizi uçtan uca şifrelemeyle koruyun."
   },
+  "contactPage": {
+    "metaTitle": "İletişim | Applyron",
+    "metaDescription": "Yeni sayfa, redesign veya web iyileştirme ihtiyacınızı kısa bir özetle paylaşın. Uygun taleplerde geri dönüş telefon numaranız üzerinden planlanır.",
+    "panelTitle": "İletişim",
+    "panelDescription": "Farklı bir kanalı tercih ediyorsanız aşağıdaki bağlantıları kullanabilirsiniz.",
+    "responseNote": "Talebiniz uygun olduğunda geri dönüş telefon numaranız üzerinden planlanır.",
+    "form": {
+      "title": "Talebinizi gönderin",
+      "description": "İhtiyacınızı kısa ve net şekilde paylaşmanız yeterlidir.",
+      "nameLabel": "Ad soyad",
+      "namePlaceholder": "Adınız ve soyadınız",
+      "phoneLabel": "Telefon numarası",
+      "phonePlaceholder": "+90 555 123 45 67",
+      "phoneHint": "Size dönüş bu numara üzerinden planlanır.",
+      "messageLabel": "Talep özeti",
+      "messagePlaceholder": "İhtiyacınızı, hedefinizi ve varsa teslim zamanını kısaca yazın.",
+      "submit": "Talebi gönder",
+      "submitting": "Gönderiliyor...",
+      "helper": "Bilgileriniz yalnızca talebinizi değerlendirmek için kullanılır.",
+      "validation": "Ad, telefon numarası ve talep özeti alanlarını doğru şekilde doldurun.",
+      "error": "Talep gönderilemedi. Lütfen tekrar deneyin.",
+      "success": "Talebiniz alındı. Uygun görülürse telefon numaranız üzerinden geri dönüş planlanır."
+    }
+  },
   "footer": {
     "rights": "Tüm hakları saklıdır."
+  },
+  "notFoundPage": {
+    "title": "Bu sayfa bulunamadi.",
+    "description": "İstediğiniz rota eksik, taşınmış veya hiç yayınlanmamış olabilir. Devam etmek için Applyron'un ana akışına dönebilirsiniz.",
+    "projectTitle": "Bu proje sayfası şu anda mevcut değil.",
+    "projectDescription": "İstenen proje detayı eksik veya artık yayında değil. Proje vitrini akışına dönebilir ya da doğrudan Applyron ile iletişime geçebilirsiniz.",
+    "primaryCta": "Ana deneyime dön",
+    "secondaryCta": "İletişim sayfasını aç"
+  },
+  "errorPage": {
+    "title": "Bu sayfa beklenmeyen bir sorunla karşılaştı.",
+    "description": "Geçerli rota içinde bir hata oluştu. Sayfayı yeniden deneyin veya sitenin stabil bir bölümüne geçin.",
+    "retry": "Tekrar dene",
+    "home": "Ana sayfaya dön",
+    "contact": "Applyron ile iletişime geç"
   }
 }

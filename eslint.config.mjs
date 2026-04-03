@@ -1,12 +1,22 @@
 import { defineConfig } from "eslint/config";
 import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export default defineConfig([
+  {
+    ignores: [
+      ".local/**",
+      ".next/**",
+      "out/**",
+      "output/**",
+      ".playwright-cli/**",
+      "coverage/**",
+      ".eslintcache",
+      "node_modules/**",
+      "public/uploads/**",
+      "raporlar/**",
+      "*.tsbuildinfo",
+    ],
+  },
   {
     extends: [...nextCoreWebVitals],
   },

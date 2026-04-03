@@ -1,24 +1,24 @@
 {
   "badge": {
-    "en": "Fullstack Developer",
-    "tr": "Fullstack Geliştirici"
+    "en": "Applyron Studio",
+    "tr": "Applyron Studio"
   },
   "heroTitle": {
-    "en": "Providing the best project experience.",
-    "tr": "En iyi proje deneyimini sunuyoruz."
+    "en": "Designing launch-ready digital experiences.",
+    "tr": "Lansmana hazir dijital deneyimler tasarliyoruz."
   },
   "heroHighlight": {
-    "en": "the best",
-    "tr": "en iyi"
+    "en": "launch-ready",
+    "tr": "Lansmana hazir"
   },
   "description": {
-    "en": "I'm a Full Stack Software Engineer with experience in Website, Mobile, and Software development. Check out my projects and skills.",
-    "tr": "Web Sitesi, Mobil ve Yazılım geliştirme alanlarında deneyimli bir Full Stack Yazılım Mühendisiyim. Projelerimi ve becerilerimi inceleyin."
+    "en": "Applyron builds multilingual websites, polished launch flows, and flexible content experiences for modern brands that need a stronger digital presence.",
+    "tr": "Applyron, daha guclu bir dijital varlik isteyen modern markalar icin cok dilli web siteleri, ozenli lansman akisleri ve esnek icerik deneyimleri tasarlar."
   },
   "ctaText": {
-    "en": "Learn more",
-    "tr": "Daha fazla"
+    "en": "Start a project",
+    "tr": "Proje baslat"
   },
-  "ctaLink": "https://instagram.com/ahmetfarukturkoglu59",
+  "ctaLink": "/contact",
   "heroImage": "/hero-bg.svg"
 }

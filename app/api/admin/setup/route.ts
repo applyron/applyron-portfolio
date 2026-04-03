@@ -1,17 +1,36 @@
 import { NextResponse } from "next/server";
 import { isAuthConfigured, setAuth } from "@/lib/data";
-import { hashPassword, generateToken, COOKIE_NAME } from "@/lib/auth";
+import {
+  clearAdminAuthCookie,
+  getJwtSecretStatus,
+  hashPassword,
+  issueAdminSessionToken,
+  jsonWithAdminSession,
+} from "@/lib/auth";
 import {
   clearAdminAuthFailures,
   inspectAdminAuthRateLimit,
   recordAdminAuthFailure,
 } from "@/lib/admin-rate-limit";
 import { getAdminRequestMessages } from "@/lib/admin-i18n-server";
+import { checkRedisHealth } from "@/lib/redis";
 import { isAdminSetupEnabled } from "@/lib/runtime-config";
 
 export async function GET() {
   const messages = await getAdminRequestMessages();
-  const authConfigured = isAuthConfigured();
+  const [authConfigured, jwtSecretStatus, redisStatus] = await Promise.all([
+    isAuthConfigured(),
+    getJwtSecretStatus(),
+    checkRedisHealth(),
+  ]);
+
+  if (!jwtSecretStatus.ok || !redisStatus.ok) {
+    return NextResponse.json(
+      { error: messages.apiErrors.authUnavailable, setupEnabled: false },
+      { status: 503 },
+    );
+  }
+
   if (!isAdminSetupEnabled(authConfigured)) {
     return NextResponse.json(
       { error: messages.apiErrors.setupDisabled, setupEnabled: false },
@@ -24,7 +43,14 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const messages = await getAdminRequestMessages();
-  const authConfigured = isAuthConfigured();
+  if (!(await getJwtSecretStatus()).ok) {
+    return NextResponse.json(
+      { error: messages.apiErrors.authUnavailable },
+      { status: 503 },
+    );
+  }
+
+  const authConfigured = await isAuthConfigured();
   if (!isAdminSetupEnabled(authConfigured)) {
     return NextResponse.json(
       { error: messages.apiErrors.setupDisabled, setupEnabled: false },
@@ -32,7 +58,16 @@ export async function POST(req: Request) {
     );
   }
 
-  const rateLimit = inspectAdminAuthRateLimit(req);
+  let rateLimit;
+  try {
+    rateLimit = await inspectAdminAuthRateLimit(req);
+  } catch {
+    return NextResponse.json(
+      { error: messages.apiErrors.authUnavailable },
+      { status: 503 },
+    );
+  }
+
   if (rateLimit.limited) {
     return NextResponse.json(
       { error: messages.apiErrors.tooManyAttempts },
@@ -48,17 +83,27 @@ export async function POST(req: Request) {
   }
   const { password } = await req.json();
   if (!password || password.length < 6) {
-    recordAdminAuthFailure(req);
-    return NextResponse.json(
+    try {
+      await recordAdminAuthFailure(req);
+    } catch {
+      return NextResponse.json(
+        { error: messages.apiErrors.authUnavailable },
+        { status: 503 },
+      );
+    }
+
+    const response = NextResponse.json(
       { error: messages.apiErrors.passwordTooShort },
       { status: 400 },
     );
+    clearAdminAuthCookie(response);
+    return response;
   }
   const hashed = await hashPassword(password);
-  setAuth({ password: hashed });
-  let token: string;
+  let sessionToken: string;
   try {
-    token = generateToken();
+    sessionToken = await issueAdminSessionToken();
+    await clearAdminAuthFailures(req);
   } catch {
     return NextResponse.json(
       { error: messages.apiErrors.authUnavailable },
@@ -66,14 +111,6 @@ export async function POST(req: Request) {
     );
   }
 
-  clearAdminAuthFailures(req);
-  const response = NextResponse.json({ success: true });
-  response.cookies.set(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24,
-    path: "/",
-  });
-  return response;
+  await setAuth({ password: hashed });
+  return jsonWithAdminSession({ success: true }, sessionToken);
 }

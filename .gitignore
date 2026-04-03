@@ -36,6 +36,7 @@ yarn-error.log*
 # admin secrets
 data/.jwt_secret
 data/auth.json
+data/messages.json
 public/uploads/
 
 # vercel
@@ -45,6 +46,9 @@ public/uploads/
 .playwright-cli/
 output/
 .eslintcache
+
+# audit reports
+raporlar/
 
 # typescript
 *.tsbuildinfo
