@@ -10,6 +10,7 @@ type AuthState = "loading" | "setup" | "login" | "authenticated";
 
 export default function AdminPage() {
   const [authState, setAuthState] = useState<AuthState>("loading");
+  const [loginNotice, setLoginNotice] = useState("");
   const { messages } = useAdminI18n();
 
   const updateAuthState = useEffectEvent((nextState: AuthState) => {
@@ -23,13 +24,16 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/setup", { cache: "no-store" });
       const data = await res.json().catch(() => null);
       if (res.ok && data && !data.isSetup) {
+        setLoginNotice("");
         updateAuthState("setup");
       } else {
         updateAuthState("login");
+        setLoginNotice("");
 
         void fetch("/api/admin/site", { cache: "no-store" })
           .then((authCheck) => {
             if (authCheck.ok) {
+              setLoginNotice("");
               updateAuthState("authenticated");
             }
           })
@@ -56,14 +60,38 @@ export default function AdminPage() {
   }
 
   if (authState === "setup") {
-    return <AdminSetup onComplete={() => setAuthState("authenticated")} />;
+    return (
+      <AdminSetup
+        onComplete={() => {
+          setLoginNotice("");
+          setAuthState("authenticated");
+        }}
+      />
+    );
   }
 
   if (authState === "login") {
-    return <AdminLogin onComplete={() => setAuthState("authenticated")} />;
+    return (
+      <AdminLogin
+        notice={loginNotice}
+        onComplete={() => {
+          setLoginNotice("");
+          setAuthState("authenticated");
+        }}
+      />
+    );
   }
 
   return (
-    <AdminDashboard onLogout={() => setAuthState("login")} />
+    <AdminDashboard
+      onLogout={() => {
+        setLoginNotice("");
+        setAuthState("login");
+      }}
+      onUnauthorized={() => {
+        setLoginNotice(messages.common.sessionExpired);
+        setAuthState("login");
+      }}
+    />
   );
 }

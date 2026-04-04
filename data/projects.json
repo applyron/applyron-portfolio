@@ -7,17 +7,22 @@
       "tr": "Modern Next.js Portföyü"
     },
     "description": {
-      "en": "Embark on a journey through my professional evolution with the \"Modern Next.js Portfolio\" - a dynamic showcase of my skills, experiences, and passion for web development.",
-      "tr": "\"Modern Next.js Portföyü\" ile profesyonel gelişimim boyunca bir yolculuğa çıkın - becerilerimi, deneyimlerimi ve web geliştirmeye olan tutkumu dinamik bir şekilde sergiliyor."
+      "en": "A bilingual Next.js showcase concept shaped for brands that need a fast first impression, clear messaging, and an easy handoff into content operations.",
+      "tr": "Hizli bir ilk izlenim, net mesajlasma ve icerik operasyonlarina kolay devir isteyen markalar icin tasarlanmis cift dilli bir Next.js vitrin kurgusu."
     },
     "longDescription": {
-      "en": "Crafted with precision and powered by Next.js, this portfolio is more than just a static display; it's an immersive experience that reflects the cutting edge of modern web technologies.",
-      "tr": "Next.js ile güçlendirilmiş bu portföy, yalnızca statik bir görüntü değil; modern web teknolojilerinin en ileri noktasını yansıtan sürükleyici bir deneyimdir."
+      "en": "This seed case study highlights Applyron's approach to reusable sections, production-minded front-end structure, and launch-ready presentation without unnecessary complexity.",
+      "tr": "Bu seed case study, Applyron'un tekrar kullanilabilir bolumler, production odakli on yuz yapisi ve gereksiz karmasiklik olmadan lansmana hazir sunum yaklasimini gosterir."
     },
-    "image": "/projects/project-1.png",
-    "technologies": ["Next.js", "React", "TypeScript", "Tailwind CSS"],
-    "githubUrl": "https://github.com",
-    "demoUrl": "https://example.com"
+    "image": "/projects/project-1.webp",
+    "technologies": [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "Tailwind CSS"
+    ],
+    "githubUrl": "",
+    "demoUrl": ""
   },
   {
     "id": "interactive-cards-portfolio",
@@ -27,17 +32,22 @@
       "tr": "Etkileşimli Kartlar Portföyü"
     },
     "description": {
-      "en": "Step into the extraordinary world of my professional journey through the \"Interactive Cards Portfolio\" - an innovative and visually captivating platform.",
-      "tr": "\"Etkileşimli Kartlar Portföyü\" aracılığıyla profesyonel yolculuğumun olağanüstü dünyasına adım atın - yenilikçi ve görsel açıdan büyüleyici bir platform."
+      "en": "An interactive card-based experience designed to help brands present services, highlights, and campaign stories in a more engaging way.",
+      "tr": "Markalarin hizmetlerini, one cikan yonlerini ve kampanya hikayelerini daha etkileyici bir sekilde sunmasi icin tasarlanmis kart tabanli etkilesimli bir deneyim."
     },
     "longDescription": {
-      "en": "Ditching the conventional static layout, this portfolio leverages interactive cards to showcase my skills, projects, and personality in an engaging and dynamic manner.",
-      "tr": "Geleneksel statik düzeni bir kenara bırakarak bu portföy, becerilerimi, projelerimi ve kişiliğimi ilgi çekici ve dinamik bir şekilde sergilemek için etkileşimli kartları kullanıyor."
+      "en": "The concept focuses on motion, modular storytelling, and flexible front-end composition so content can feel premium without depending on a heavy CMS stack.",
+      "tr": "Bu konsept; hareket, moduler hikaye anlatimi ve esnek on yuz kurgusuna odaklanir; boylece icerik, agir bir CMS kurgusuna bagli kalmadan premium hissettirir."
     },
-    "image": "/projects/project-2.png",
-    "technologies": ["React", "Framer Motion", "CSS", "JavaScript"],
-    "githubUrl": "https://github.com",
-    "demoUrl": "https://example.com"
+    "image": "/projects/project-2.webp",
+    "technologies": [
+      "React",
+      "Framer Motion",
+      "CSS",
+      "JavaScript"
+    ],
+    "githubUrl": "",
+    "demoUrl": ""
   },
   {
     "id": "space-themed-website",
@@ -47,16 +57,21 @@
       "tr": "Uzay Temalı Web Sitesi"
     },
     "description": {
-      "en": "Embark on an interstellar journey with my \"Space Themed Website\", a mesmerizing space-themed website that invites you to explore the cosmic wonders beyond our world.",
-      "tr": "\"Uzay Temalı Web Sitem\" ile yıldızlararası bir yolculuğa çıkın - sizi dünyamızın ötesindeki kozmik harikaları keşfetmeye davet eden büyüleyici bir uzay temalı web sitesi."
+      "en": "A visually immersive concept for brands that want a bold landing experience with depth, motion, and a more atmospheric storytelling layer.",
+      "tr": "Derinlik, hareket ve daha atmosferik bir hikaye anlatimi katmani isteyen markalar icin hazirlanmis gorsel olarak surukleyici bir landing experience kurgusu."
     },
     "longDescription": {
-      "en": "Immerse yourself in an awe-inspiring digital experience that blends cutting-edge design with the mysteries of the universe.",
-      "tr": "Son teknoloji tasarımı evrenin gizemleriyle harmanlayan nefes kesici bir dijital deneyime kendinizi bırakın."
+      "en": "The seed project demonstrates how cinematic visuals and modern front-end tooling can support a distinctive brand presentation without sacrificing clarity.",
+      "tr": "Bu seed proje, sinematik gorseller ile modern on yuz araclarinin netlikten odun vermeden ayirt edici bir marka sunumunu nasil destekleyebilecegini gosterir."
     },
-    "image": "/projects/project-3.png",
-    "technologies": ["Three.js", "React", "WebGL", "GSAP"],
-    "githubUrl": "https://github.com",
-    "demoUrl": "https://example.com"
+    "image": "/projects/project-3.webp",
+    "technologies": [
+      "Three.js",
+      "React",
+      "WebGL",
+      "GSAP"
+    ],
+    "githubUrl": "",
+    "demoUrl": ""
   }
 ]

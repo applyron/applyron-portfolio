@@ -1,9 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { SocialsData, SocialItem, FooterGroup } from "@/lib/data";
+import { useEffect, useEffectEvent, useState } from "react";
+
+import type { SocialItem, SocialsData } from "@/lib/data";
+import { validateSocials } from "@/lib/validate";
+
 import IconPicker from "../IconPicker";
 import { useAdminI18n } from "../AdminI18nProvider";
+import {
+  type AdminTabProps,
+  getAdminErrorMessage,
+  useDirtyTracker,
+} from "./tab-utils";
 
 const newItem = (): SocialItem => ({
   id: Date.now().toString(),
@@ -12,84 +20,129 @@ const newItem = (): SocialItem => ({
   link: "",
 });
 
-const newFooterGroup = (title: string): FooterGroup => ({
-  id: Date.now().toString(),
-  title,
-  items: [],
-});
-
-export default function SocialsTab() {
+export default function SocialsTab({
+  onDirtyChange,
+  onUnauthorized,
+}: AdminTabProps) {
   const [data, setData] = useState<SocialsData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
   const { messages } = useAdminI18n();
+  const { currentSnapshot, setCleanSnapshot } = useDirtyTracker(
+    data,
+    onDirtyChange,
+  );
+
+  const loadSocials = useEffectEvent(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/socials", {
+        cache: "no-store",
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (response.status === 401) {
+        onUnauthorized?.();
+        return;
+      }
+
+      if (!response.ok) {
+        setError(getAdminErrorMessage(payload, messages.common.loadError));
+        return;
+      }
+
+      if (validateSocials(payload).length > 0) {
+        setError(messages.common.loadError);
+        return;
+      }
+
+      setData(payload);
+      setCleanSnapshot(JSON.stringify(payload));
+    } catch {
+      setError(messages.common.loadError);
+    } finally {
+      setLoading(false);
+    }
+  });
 
   useEffect(() => {
-    fetch("/api/admin/socials")
-      .then((r) => r.json())
-      .then(setData);
+    void loadSocials();
   }, []);
 
   async function handleSave() {
-    if (!data) return;
+    if (!data) {
+      return;
+    }
+
     setSaving(true);
     setSaved(false);
-    await fetch("/api/admin/socials", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/socials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (response.status === 401) {
+        onUnauthorized?.();
+        return;
+      }
+
+      if (!response.ok || payload?.success !== true) {
+        setError(getAdminErrorMessage(payload, messages.common.saveError));
+        return;
+      }
+
+      setSaved(true);
+      setCleanSnapshot(currentSnapshot);
+      setTimeout(() => setSaved(false), 3000);
+    } catch {
+      setError(messages.common.saveError);
+    } finally {
+      setSaving(false);
+    }
   }
 
-  if (!data) {
+  function updateNavbarItem(
+    id: string,
+    field: keyof SocialItem,
+    value: string | null,
+  ) {
+    setData(
+      (prev) =>
+        prev && {
+          ...prev,
+          navbar: prev.navbar.map((item) =>
+            item.id === id ? { ...item, [field]: value } : item,
+          ),
+        },
+    );
+  }
+
+  function removeNavbarItem(id: string) {
+    setData(
+      (prev) =>
+        prev && {
+          ...prev,
+          navbar: prev.navbar.filter((item) => item.id !== id),
+        },
+    );
+  }
+  if (loading) {
     return (
       <div className="text-gray-400 animate-pulse">{messages.common.loading}</div>
     );
   }
 
-  function updateNavbarItem(id: string, field: keyof SocialItem, value: string | null) {
-    setData((prev) => prev && ({
-      ...prev,
-      navbar: prev.navbar.map((i) => i.id === id ? { ...i, [field]: value } : i),
-    }));
-  }
-
-  function removeNavbarItem(id: string) {
-    setData((prev) => prev && ({ ...prev, navbar: prev.navbar.filter((i) => i.id !== id) }));
-  }
-
-  function updateFooterItem(groupId: string, itemId: string, field: keyof SocialItem, value: string | null) {
-    setData((prev) => prev && ({
-      ...prev,
-      footer: prev.footer.map((g) =>
-        g.id === groupId
-          ? { ...g, items: g.items.map((i) => i.id === itemId ? { ...i, [field]: value } : i) }
-          : g,
-      ),
-    }));
-  }
-
-  function removeFooterItem(groupId: string, itemId: string) {
-    setData((prev) => prev && ({
-      ...prev,
-      footer: prev.footer.map((g) =>
-        g.id === groupId ? { ...g, items: g.items.filter((i) => i.id !== itemId) } : g,
-      ),
-    }));
-  }
-
-  function removeGroup(groupId: string) {
-    setData((prev) => prev && ({ ...prev, footer: prev.footer.filter((g) => g.id !== groupId) }));
-  }
-
-  function updateGroupTitle(groupId: string, title: string) {
-    setData((prev) => prev && ({
-      ...prev,
-      footer: prev.footer.map((g) => g.id === groupId ? { ...g, title } : g),
-    }));
+  if (!data) {
+    return <p className="text-sm text-red-400">{error || messages.common.loadError}</p>;
   }
 
   return (
@@ -104,7 +157,11 @@ export default function SocialsTab() {
             {messages.socials.navbarIcons}
           </h3>
           <button
-            onClick={() => setData((prev) => prev && ({ ...prev, navbar: [...prev.navbar, newItem()] }))}
+            onClick={() =>
+              setData((prev) =>
+                prev && { ...prev, navbar: [...prev.navbar, newItem()] },
+              )
+            }
             className="px-3 py-1.5 text-xs rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 hover:bg-purple-600/50 transition"
           >
             {messages.socials.addItem}
@@ -126,76 +183,6 @@ export default function SocialsTab() {
         </div>
       </section>
 
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-base font-semibold text-purple-300">
-            {messages.socials.footerGroups}
-          </h3>
-          <button
-            onClick={() =>
-              setData((prev) =>
-                prev && ({
-                  ...prev,
-                  footer: [...prev.footer, newFooterGroup(messages.socials.newGroup)],
-                })
-              )
-            }
-            className="px-3 py-1.5 text-xs rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 hover:bg-purple-600/50 transition"
-          >
-            {messages.socials.addGroup}
-          </button>
-        </div>
-        <div className="space-y-4">
-          {data.footer.map((group) => (
-            <div key={group.id} className="bg-[#0d0030] border border-purple-500/20 rounded-xl p-4">
-              <div className="flex items-center gap-3 mb-3">
-                <input
-                  type="text"
-                  value={group.title}
-                  onChange={(e) => updateGroupTitle(group.id, e.target.value)}
-                  className="flex-1 bg-[#06001a] border border-purple-500/20 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-purple-500 transition"
-                  placeholder={messages.socials.groupTitlePlaceholder}
-                />
-                <button
-                  onClick={() => removeGroup(group.id)}
-                  className="px-3 py-1.5 text-xs rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition"
-                >
-                  {messages.socials.removeGroup}
-                </button>
-                <button
-                  onClick={() =>
-                    setData((prev) => prev && ({
-                      ...prev,
-                      footer: prev.footer.map((g) =>
-                        g.id === group.id ? { ...g, items: [...g.items, newItem()] } : g,
-                      ),
-                    }))
-                  }
-                  className="px-3 py-1.5 text-xs rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 hover:bg-purple-600/50 transition"
-                >
-                  {messages.socials.addGroupItem}
-                </button>
-              </div>
-              <div className="space-y-2">
-                {group.items.map((item) => (
-                  <SocialItemRow
-                    key={item.id}
-                    item={item}
-                    allowNoIcon
-                    onUpdate={(field, value) => updateFooterItem(group.id, item.id, field, value)}
-                    onRemove={() => removeFooterItem(group.id, item.id)}
-                    messages={messages}
-                  />
-                ))}
-                {group.items.length === 0 && (
-                  <p className="text-gray-600 text-xs">{messages.socials.noItems}</p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       <div className="mt-8 flex items-center gap-4">
         <button
           onClick={handleSave}
@@ -206,6 +193,8 @@ export default function SocialsTab() {
         </button>
         {saved && <span className="text-green-400 text-sm">{messages.common.saved}</span>}
       </div>
+
+      {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
     </div>
   );
 }
@@ -232,7 +221,7 @@ function SocialItemRow({
         <input
           type="text"
           value={item.name}
-          onChange={(e) => onUpdate("name", e.target.value)}
+          onChange={(event) => onUpdate("name", event.target.value)}
           placeholder={messages.socials.namePlaceholder}
           className="w-full bg-[#06001a] border border-purple-500/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500 transition"
         />
@@ -257,7 +246,7 @@ function SocialItemRow({
         <input
           type="url"
           value={item.link}
-          onChange={(e) => onUpdate("link", e.target.value)}
+          onChange={(event) => onUpdate("link", event.target.value)}
           placeholder={messages.socials.urlPlaceholder}
           className="w-full bg-[#06001a] border border-purple-500/20 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500 transition"
         />

@@ -21,7 +21,7 @@ export const ProjectCard = ({
   return (
     <Link
       href={`/${locale}/projects/${slug}`}
-      className="group relative overflow-hidden rounded-lg shadow-lg border border-[#2A0E61] cursor-pointer hover:border-purple-500/50 transition-colors duration-300"
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#2A0E61] shadow-lg transition-colors duration-300 hover:border-purple-500/50"
     >
       <Image
         src={src}
@@ -32,10 +32,10 @@ export const ProjectCard = ({
         className="h-auto w-full object-contain group-hover:scale-[1.02] transition-transform duration-300"
       />
 
-      <div className="relative p-4">
-        <h1 className="text-2xl font-semibold text-white">{title}</h1>
+      <div className="relative flex flex-1 flex-col p-4 sm:p-5">
+        <h3 className="text-xl font-semibold text-white sm:text-2xl">{title}</h3>
         <p className="mt-2 text-gray-300 line-clamp-3">{description}</p>
-        <span className="inline-block mt-3 text-sm text-purple-400 group-hover:text-purple-300 transition-colors">
+        <span className="mt-4 inline-block text-sm text-purple-400 transition-colors group-hover:text-purple-300">
           {ctaLabel}
         </span>
       </div>

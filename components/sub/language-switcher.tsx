@@ -25,7 +25,7 @@ export const LanguageSwitcher = () => {
 
   return (
     <div
-      className="flex items-center rounded-full border border-[rgba(112,66,248,0.5)] overflow-hidden"
+      className="inline-flex shrink-0 items-center overflow-hidden rounded-full border border-[rgba(112,66,248,0.5)] bg-[rgba(3,0,20,0.34)]"
       title={t("switchLanguage")}
     >
       {languages.map((language, i) => (

@@ -5,6 +5,7 @@ const { spawn } = require("child_process");
 const DATA_DIR = process.env.APP_DATA_DIR?.trim() || path.join(process.cwd(), "data");
 const UPLOADS_DIR = process.env.APP_UPLOADS_DIR?.trim() || path.join(process.cwd(), "public", "uploads");
 const SEED_DIR = path.join(process.cwd(), "seed-data");
+const FORWARDABLE_SIGNALS = ["SIGTERM", "SIGINT"];
 
 function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
@@ -33,8 +34,31 @@ function startServer() {
     env: process.env,
   });
 
+  let shutdownSignal = null;
+
+  function forwardSignal(signal) {
+    if (shutdownSignal || child.exitCode !== null || child.signalCode !== null) {
+      return;
+    }
+
+    shutdownSignal = signal;
+    child.kill(signal);
+  }
+
+  FORWARDABLE_SIGNALS.forEach((signal) => {
+    process.once(signal, () => forwardSignal(signal));
+  });
+
+  child.on("error", (error) => {
+    console.error("Failed to start Next.js server:", error);
+    process.exit(1);
+  });
+
   child.on("exit", (code, signal) => {
     if (signal) {
+      FORWARDABLE_SIGNALS.forEach((forwardedSignal) => {
+        process.removeAllListeners(forwardedSignal);
+      });
       process.kill(process.pid, signal);
       return;
     }

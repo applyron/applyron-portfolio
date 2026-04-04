@@ -4,9 +4,12 @@ import { useState } from "react";
 import AdminLanguageSwitcher from "./AdminLanguageSwitcher";
 import { useAdminI18n } from "./AdminI18nProvider";
 
-type Props = { onComplete: () => void };
+type Props = {
+  notice?: string;
+  onComplete: () => void;
+};
 
-export default function AdminLogin({ onComplete }: Props) {
+export default function AdminLogin({ notice, onComplete }: Props) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -57,6 +60,12 @@ export default function AdminLogin({ onComplete }: Props) {
           onSubmit={handleSubmit}
           className="bg-[#0a0020] border border-purple-500/30 rounded-2xl p-8 shadow-xl shadow-purple-900/20"
         >
+          {notice && (
+            <div className="mb-4 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-300">
+              {notice}
+            </div>
+          )}
+
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-300 mb-2">
               {messages.auth.login.passwordLabel}

@@ -1,3 +1,4 @@
+import { fileTypeFromBuffer } from "file-type";
 import sharp from "sharp";
 
 export const UPLOAD_TARGETS = {
@@ -24,10 +25,18 @@ export const UPLOAD_TARGETS = {
 } as const;
 
 export type UploadTarget = keyof typeof UPLOAD_TARGETS;
+export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+export const MAX_UPLOAD_REQUEST_BYTES = 6 * 1024 * 1024;
+export const ALLOWED_UPLOAD_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+export type AllowedUploadMimeType = (typeof ALLOWED_UPLOAD_MIME_TYPES)[number];
 
 type ProcessUploadInput = {
   buffer: Buffer;
-  mimeType: string;
+  mimeType: AllowedUploadMimeType;
   target: UploadTarget;
 };
 
@@ -40,7 +49,7 @@ type ProcessUploadResult = {
 };
 
 const RASTER_FORMATS: Record<
-  string,
+  AllowedUploadMimeType,
   {
     extension: string;
     output:
@@ -75,6 +84,19 @@ const RASTER_FORMATS: Record<
 export function normalizeUploadTarget(target: FormDataEntryValue | null): UploadTarget {
   if (typeof target !== "string") return "generic";
   return target in UPLOAD_TARGETS ? (target as UploadTarget) : "generic";
+}
+
+export async function detectUploadMimeType(
+  buffer: Buffer,
+): Promise<AllowedUploadMimeType | null> {
+  const detected = await fileTypeFromBuffer(buffer);
+  if (!detected) {
+    return null;
+  }
+
+  return ALLOWED_UPLOAD_MIME_TYPES.includes(detected.mime as AllowedUploadMimeType)
+    ? (detected.mime as AllowedUploadMimeType)
+    : null;
 }
 
 export async function processUploadedImage({

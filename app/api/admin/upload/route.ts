@@ -1,8 +1,19 @@
 import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
-import { isAuthenticated } from "@/lib/auth";
-import { normalizeUploadTarget, processUploadedImage, UPLOAD_TARGETS } from "@/lib/upload-image";
+import {
+  isAuthenticated,
+  issueAdminSessionToken,
+  jsonWithAdminSession,
+} from "@/lib/auth";
+import {
+  detectUploadMimeType,
+  MAX_UPLOAD_BYTES,
+  MAX_UPLOAD_REQUEST_BYTES,
+  normalizeUploadTarget,
+  processUploadedImage,
+  UPLOAD_TARGETS,
+} from "@/lib/upload-image";
 import { getAdminRequestMessages } from "@/lib/admin-i18n-server";
 import { getUploadsDir } from "@/lib/runtime-config";
 
@@ -11,32 +22,76 @@ export async function POST(req: Request) {
   if (!(await isAuthenticated())) {
     return NextResponse.json({ error: messages.apiErrors.unauthorized }, { status: 401 });
   }
+
+  let sessionToken: string;
+  try {
+    sessionToken = await issueAdminSessionToken();
+  } catch {
+    return NextResponse.json(
+      { error: messages.apiErrors.authUnavailable },
+      { status: 503 },
+    );
+  }
+
+  const contentLength = Number(req.headers.get("content-length") ?? "");
+  if (Number.isFinite(contentLength) && contentLength > MAX_UPLOAD_REQUEST_BYTES) {
+    return jsonWithAdminSession(
+      { error: messages.apiErrors.fileTooLarge },
+      sessionToken,
+      { status: 413 },
+    );
+  }
+
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
   const target = normalizeUploadTarget(formData.get("target"));
   if (!file) {
-    return NextResponse.json({ error: messages.apiErrors.noFileProvided }, { status: 400 });
+    return jsonWithAdminSession(
+      { error: messages.apiErrors.noFileProvided },
+      sessionToken,
+      { status: 400 },
+    );
   }
 
-  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-  if (!allowedTypes.includes(file.type)) {
-    return NextResponse.json({ error: messages.apiErrors.invalidFileType }, { status: 400 });
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return jsonWithAdminSession(
+      { error: messages.apiErrors.fileTooLarge },
+      sessionToken,
+      { status: 413 },
+    );
   }
 
-  const maxSize = 5 * 1024 * 1024;
-  if (file.size > maxSize) {
-    return NextResponse.json({ error: messages.apiErrors.fileTooLarge }, { status: 400 });
+  const buffer = Buffer.from(await file.arrayBuffer());
+  if (buffer.length > MAX_UPLOAD_BYTES) {
+    return jsonWithAdminSession(
+      { error: messages.apiErrors.fileTooLarge },
+      sessionToken,
+      { status: 413 },
+    );
+  }
+
+  const mimeType = await detectUploadMimeType(buffer);
+  if (!mimeType) {
+    return jsonWithAdminSession(
+      { error: messages.apiErrors.invalidFileType },
+      sessionToken,
+      { status: 400 },
+    );
   }
 
   let processed: Awaited<ReturnType<typeof processUploadedImage>>;
   try {
     processed = await processUploadedImage({
-      buffer: Buffer.from(await file.arrayBuffer()),
-      mimeType: file.type,
+      buffer,
+      mimeType,
       target,
     });
   } catch {
-    return NextResponse.json({ error: messages.apiErrors.invalidFileType }, { status: 400 });
+    return jsonWithAdminSession(
+      { error: messages.apiErrors.invalidFileType },
+      sessionToken,
+      { status: 400 },
+    );
   }
 
   const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${processed.extension}`;
@@ -45,12 +100,15 @@ export async function POST(req: Request) {
   const filePath = path.join(uploadDir, filename);
   await writeFile(filePath, processed.buffer);
 
-  return NextResponse.json({
-    url: `/uploads/${filename}`,
-    resized: processed.resized,
-    width: processed.width,
-    height: processed.height,
-    target,
-    targetLabel: UPLOAD_TARGETS[target].label,
-  });
+  return jsonWithAdminSession(
+    {
+      url: `/uploads/${filename}`,
+      resized: processed.resized,
+      width: processed.width,
+      height: processed.height,
+      target,
+      targetLabel: UPLOAD_TARGETS[target].label,
+    },
+    sessionToken,
+  );
 }

@@ -1,0 +1,264 @@
+{
+  "core": [
+    {
+      "id": "core-html",
+      "name": "HTML",
+      "image": "html.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "core-css",
+      "name": "CSS",
+      "image": "css.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "core-js",
+      "name": "JavaScript",
+      "image": "js.webp",
+      "width": 65,
+      "height": 65
+    },
+    {
+      "id": "core-tailwind",
+      "name": "Tailwind CSS",
+      "image": "tailwind.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "core-react",
+      "name": "React",
+      "image": "react.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "core-redux",
+      "name": "Redux",
+      "image": "redux.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "core-react-query",
+      "name": "React Query",
+      "image": "reactquery.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "core-typescript",
+      "name": "TypeScript",
+      "image": "ts.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "core-nextjs",
+      "name": "Next.js",
+      "image": "next.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "core-framer",
+      "name": "Framer Motion",
+      "image": "framer.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "core-stripe",
+      "name": "Stripe",
+      "image": "stripe.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "core-node",
+      "name": "Node.js",
+      "image": "node.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "core-mongodb",
+      "name": "MongoDB",
+      "image": "mongodb.webp",
+      "width": 40,
+      "height": 40
+    }
+  ],
+  "frontend": [
+    {
+      "id": "frontend-html",
+      "name": "HTML",
+      "image": "html.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "frontend-css",
+      "name": "CSS",
+      "image": "css.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "frontend-js",
+      "name": "JavaScript",
+      "image": "js.webp",
+      "width": 65,
+      "height": 65
+    },
+    {
+      "id": "frontend-tailwind",
+      "name": "Tailwind CSS",
+      "image": "tailwind.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "frontend-mui",
+      "name": "Material UI",
+      "image": "mui.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "frontend-react",
+      "name": "React",
+      "image": "react.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "frontend-redux",
+      "name": "Redux",
+      "image": "redux.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "frontend-react-query",
+      "name": "React Query",
+      "image": "reactquery.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "frontend-typescript",
+      "name": "TypeScript",
+      "image": "ts.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "frontend-nextjs",
+      "name": "Next.js",
+      "image": "next.webp",
+      "width": 80,
+      "height": 80
+    }
+  ],
+  "backend": [
+    {
+      "id": "backend-node",
+      "name": "Node.js",
+      "image": "node.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "backend-express",
+      "name": "Express.js",
+      "image": "express.webp",
+      "width": 80,
+      "height": 80
+    },
+    {
+      "id": "backend-mongodb",
+      "name": "MongoDB",
+      "image": "mongodb.webp",
+      "width": 40,
+      "height": 40
+    },
+    {
+      "id": "backend-firebase",
+      "name": "Firebase",
+      "image": "firebase.webp",
+      "width": 55,
+      "height": 55
+    },
+    {
+      "id": "backend-postgresql",
+      "name": "PostgreSQL",
+      "image": "postgresql.webp",
+      "width": 70,
+      "height": 70
+    },
+    {
+      "id": "backend-mysql",
+      "name": "MySQL",
+      "image": "mysql.webp",
+      "width": 70,
+      "height": 70
+    },
+    {
+      "id": "backend-prisma",
+      "name": "Prisma",
+      "image": "prisma.webp",
+      "width": 70,
+      "height": 70
+    },
+    {
+      "id": "backend-graphql",
+      "name": "GraphQL",
+      "image": "graphql.webp",
+      "width": 80,
+      "height": 80
+    }
+  ],
+  "fullstack": [
+    {
+      "id": "fullstack-react-native",
+      "name": "React Native",
+      "image": "reactnative.webp",
+      "width": 70,
+      "height": 70
+    },
+    {
+      "id": "fullstack-tauri",
+      "name": "Tauri",
+      "image": "tauri.webp",
+      "width": 70,
+      "height": 70
+    },
+    {
+      "id": "fullstack-docker",
+      "name": "Docker",
+      "image": "docker.webp",
+      "width": 70,
+      "height": 70
+    },
+    {
+      "id": "fullstack-figma",
+      "name": "Figma",
+      "image": "figma.webp",
+      "width": 50,
+      "height": 50
+    }
+  ],
+  "other": [
+    {
+      "id": "other-go",
+      "name": "Go",
+      "image": "go.webp",
+      "width": 60,
+      "height": 60
+    }
+  ]
+}

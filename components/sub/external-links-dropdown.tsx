@@ -36,7 +36,7 @@ export const ExternalLinksDropdown = ({ links, label = "External Links" }: Props
   return (
     <div
       ref={containerRef}
-      className="relative"
+      className="relative shrink-0"
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
       onBlur={handleBlur}
@@ -49,7 +49,7 @@ export const ExternalLinksDropdown = ({ links, label = "External Links" }: Props
       <button
         onClick={() => setOpen((prev) => !prev)}
         onFocus={() => setOpen(true)}
-        className="cursor-pointer hover:text-[rgb(112,66,248)] transition flex items-center gap-1"
+        className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-sm transition hover:text-[rgb(112,66,248)] xl:text-base"
         aria-haspopup="true"
         aria-expanded={open}
         aria-controls="external-links-menu"
