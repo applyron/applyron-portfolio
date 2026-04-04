@@ -1,6 +1,6 @@
-# Applyron Server Deployment
+# VPS Deployment
 
-This repository is prepared for Docker-based production deployment on Applyron Server.
+This repository is prepared for Docker-based production deployment on a Linux VPS.
 
 ## Runtime Model
 
@@ -42,8 +42,8 @@ APP_PUBLIC_URL=https://your-domain.com
 REDIS_URL=redis://redis:6379/0
 ADMIN_JWT_SECRET=replace-with-a-long-random-secret
 ADMIN_JWT_SECRET_FILE=
-APP_DATA_DIR=/srv/platform/apps/applyron-portfolio/data
-APP_UPLOADS_DIR=/srv/platform/apps/applyron-portfolio/uploads
+APP_DATA_DIR=/srv/apps/your-app-name/data
+APP_UPLOADS_DIR=/srv/apps/your-app-name/uploads
 ADMIN_SETUP_ENABLED=
 ```
 
@@ -77,8 +77,8 @@ The container startup script will:
 Prepare the bind mount directories with the same UID/GID used by the container runtime:
 
 ```bash
-sudo install -d -o 1001 -g 1001 /srv/platform/apps/applyron-portfolio/data
-sudo install -d -o 1001 -g 1001 /srv/platform/apps/applyron-portfolio/uploads
+sudo install -d -o 1001 -g 1001 /srv/apps/your-app-name/data
+sudo install -d -o 1001 -g 1001 /srv/apps/your-app-name/uploads
 ```
 
 ## Docker Compose
@@ -92,7 +92,7 @@ sudo install -d -o 1001 -g 1001 /srv/platform/apps/applyron-portfolio/uploads
 - a named Redis persistence volume
 - healthcheck against `http://127.0.0.1:3000/api/health`
 
-To validate the Compose file locally, copy `.env.example` to `.env.production`, run `docker compose -f docker-compose.prod.yml config`, then remove the temporary `.env.production` file again.
+To validate the Compose file locally, copy `.env.example` to `.env.production`, run `docker compose --env-file .env.production -f docker-compose.prod.yml config`, then remove the temporary `.env.production` file again.
 
 If the external network does not exist yet:
 
@@ -130,34 +130,21 @@ The workflow:
 5. validates `github.actor` against the allowlist
 6. connects over SSH
 7. verifies the remote `ed25519` host fingerprint before trusting the host key
-8. syncs the repository to `/srv/apps/applyron-portfolio/repo`
-9. creates a timestamped release under `/srv/apps/applyron-portfolio/releases`
-10. updates `/srv/apps/applyron-portfolio/current` to point at the new release
+8. syncs the repository to `${REMOTE_APP_DIR}/repo`
+9. creates a timestamped release under `${REMOTE_APP_DIR}/releases`
+10. updates `${REMOTE_APP_DIR}/current` to point at the new release
 11. deploys through the Dockge-managed stack file:
 
 ```bash
-docker compose --project-name applyron-portfolio \
-  -f /opt/stacks/applyron-portfolio/compose.yaml \
+docker compose --project-name "${APP_NAME}" \
+  -f "${REMOTE_STACK_DIR}/compose.yaml" \
   up -d --build --remove-orphans
 ```
 
 12. waits for `http://127.0.0.1:${APP_PORT}/api/health`
 13. rolls back `current` to the previous release if the healthcheck fails
 
-The allowlist, server paths, and timeout are intentionally easy to change inside `.github/workflows/deploy-vps.yml`.
-
-## Canonical Production Paths
-
-The production deploy now assumes these canonical paths on the server:
-
-- repository sync cache: `/srv/apps/applyron-portfolio/repo`
-- release history: `/srv/apps/applyron-portfolio/releases`
-- active release symlink: `/srv/apps/applyron-portfolio/current`
-- previous release symlink: `/srv/apps/applyron-portfolio/previous`
-- shared environment file: `/srv/apps/applyron-portfolio/shared/.env.production`
-- Dockge stack file: `/opt/stacks/applyron-portfolio/compose.yaml`
-
-This is important because the Dockge stack is the canonical Compose entrypoint, while the `current` symlink controls which release the stack builds from.
+The workflow intentionally expects deploy-specific values to come from repository variables and secrets, so the public repo does not need to expose real infrastructure paths.
 
 ## Required GitHub Secrets
 
@@ -169,7 +156,29 @@ By default, SSH uses port `22`.
 
 ## Required GitHub Variables
 
+- `APP_NAME`
+- `REMOTE_APP_DIR`
+- `REMOTE_STACK_DIR`
+- `REMOTE_ENV_FILE`
 - `DEPLOY_HOST_ED25519_FINGERPRINT`
+
+## Optional GitHub Variables
+
+- `ALLOWED_DEPLOY_ACTORS`
+- `SSH_PORT`
+- `HEALTHCHECK_TIMEOUT`
+
+Example values:
+
+```text
+APP_NAME=your-app-name
+REMOTE_APP_DIR=/srv/apps/your-app-name
+REMOTE_STACK_DIR=/opt/stacks/your-app-name
+REMOTE_ENV_FILE=/srv/apps/your-app-name/shared/.env.production
+ALLOWED_DEPLOY_ACTORS=your-github-username
+SSH_PORT=22
+HEALTHCHECK_TIMEOUT=120
+```
 
 Example command to capture the expected fingerprint:
 
@@ -179,8 +188,8 @@ ssh-keyscan -p 22 -t ed25519 your-domain.com | ssh-keygen -lf - -E sha256
 
 ## Deploy Behaviour Notes
 
-- The GitHub Actions job does not depend on `/srv/platform/bin/deploy-app` anymore.
-- The stack remains manageable from Dockge because the running Compose project always comes from `/opt/stacks/applyron-portfolio/compose.yaml`.
+- The GitHub Actions job does not depend on a server-local wrapper script.
+- The stack remains manageable from Dockge because the running Compose project always comes from the stack file under `REMOTE_STACK_DIR`.
 - Release cutover happens by switching the `current` symlink before `docker compose up -d --build`.
 - Healthcheck rollback restores the previous `current` symlink and re-runs the same Dockge stack.
 

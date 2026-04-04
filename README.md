@@ -48,7 +48,7 @@ Compared to the reference project, this repository adds:
 - Runtime auth using `bcrypt` password hashing and JWT cookies
 - Redis-backed throttling for admin auth endpoints
 - Persistent `data/` and `uploads/` support through runtime environment variables
-- Docker-ready production deployment for Applyron Server
+- Docker-ready production deployment for a VPS environment
 - Magic-bytes image validation, strict admin cookies, and non-root container runtime
 - Simplified footer and removal of services/privacy/terms pages from the public site
 
@@ -154,7 +154,7 @@ Admin auth details:
 
 ## Deployment
 
-Production deployment is designed for `GitHub Actions -> Applyron Server`.
+Production deployment is designed for `GitHub Actions -> VPS`.
 
 The production stack now assumes:
 
@@ -164,6 +164,8 @@ The production stack now assumes:
 - Seeded tracked content JSON files for fresh runtime startup, including `skills.json`
 - Health checks through `/api/health`
 - Fingerprint-pinned SSH trust in GitHub Actions deploy
+
+Real server paths, actor allowlists, and deploy host details are expected to be configured through GitHub repository variables and secrets rather than hardcoded into the public repo.
 
 Deployment details, required secrets, and the `.env.production` shape are documented in [`docs/deploy-vps.md`](./docs/deploy-vps.md).
 

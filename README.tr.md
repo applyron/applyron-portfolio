@@ -48,7 +48,7 @@ Referans projeye kıyasla bu repo şunları ekler:
 - `bcrypt` parola hashleme ve JWT cookie oturumu
 - Admin auth endpoint'lerinde Redis tabanlı throttle
 - Environment variable üzerinden kalıcı `data/` ve `uploads/` desteği
-- Applyron Server için Docker tabanlı production deploy hazırlığı
+- VPS ortamı için Docker tabanlı production deploy hazırlığı
 - Magic-bytes görsel doğrulaması, strict admin cookie ve non-root container runtime
 - Sadeleştirilmiş footer ve public tarafta hizmetler/gizlilik/koşullar sayfalarının kaldırılması
 
@@ -154,7 +154,7 @@ Admin auth detayları:
 
 ## Deployment
 
-Production deploy akışı `GitHub Actions -> Applyron Server` modeli için hazırlanmıştır.
+Production deploy akışı `GitHub Actions -> VPS` modeli için hazırlanmıştır.
 
 Production tarafı artık şunları varsayar:
 
@@ -164,6 +164,8 @@ Production tarafı artık şunları varsayar:
 - ilk runtime kurulumu için `skills.json` dahil versionlanan içerik dosyalarının seed edilmesi
 - `/api/health` üzerinden health check
 - GitHub Actions içinde fingerprint-pinned SSH trust
+
+Gerçek sunucu path'leri, actor allowlist'i ve deploy host bilgileri public repo içine yazılmak yerine GitHub repository variable ve secret'ları üzerinden yapılandırılmalıdır.
 
 Deploy ayrıntıları, gerekli secret'lar ve `.env.production` yapısı [`docs/deploy-vps.md`](./docs/deploy-vps.md) içinde bulunur.
 

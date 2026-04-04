@@ -1,4 +1,4 @@
-name: Deploy to Applyron Server
+name: Deploy to VPS
 
 on:
   workflow_dispatch:
@@ -14,13 +14,13 @@ permissions:
   contents: read
 
 env:
-  APP_NAME: applyron-portfolio
-  ALLOWED_DEPLOY_ACTORS: ahmetfarukturkoglu
-  SSH_PORT: 22
-  REMOTE_APP_DIR: /srv/apps/applyron-portfolio
-  REMOTE_STACK_DIR: /opt/stacks/applyron-portfolio
-  REMOTE_ENV_FILE: /srv/apps/applyron-portfolio/shared/.env.production
-  HEALTHCHECK_TIMEOUT: 120
+  APP_NAME: ${{ vars.APP_NAME }}
+  ALLOWED_DEPLOY_ACTORS: ${{ vars.ALLOWED_DEPLOY_ACTORS }}
+  SSH_PORT: ${{ vars.SSH_PORT || '22' }}
+  REMOTE_APP_DIR: ${{ vars.REMOTE_APP_DIR }}
+  REMOTE_STACK_DIR: ${{ vars.REMOTE_STACK_DIR }}
+  REMOTE_ENV_FILE: ${{ vars.REMOTE_ENV_FILE }}
+  HEALTHCHECK_TIMEOUT: ${{ vars.HEALTHCHECK_TIMEOUT || '120' }}
 
 jobs:
   deploy:
@@ -49,10 +49,37 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Validate deploy configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          required=(
+            APP_NAME
+            REMOTE_APP_DIR
+            REMOTE_STACK_DIR
+            REMOTE_ENV_FILE
+            DEPLOY_HOST
+            DEPLOY_USER
+            DEPLOY_HOST_ED25519_FINGERPRINT
+          )
+
+          for key in "${required[@]}"; do
+            if [ -z "${!key:-}" ]; then
+              echo "${key} is required. Configure it via repository variables or secrets."
+              exit 1
+            fi
+          done
+
       - name: Validate deploy actor
         shell: bash
         run: |
           set -euo pipefail
+
+          if [ -z "${ALLOWED_DEPLOY_ACTORS}" ]; then
+            echo "ALLOWED_DEPLOY_ACTORS is not set. Skipping actor allowlist check."
+            exit 0
+          fi
 
           actor_allowed="false"
           IFS=',' read -ra actors <<< "${ALLOWED_DEPLOY_ACTORS}"
@@ -108,7 +135,7 @@ jobs:
         run: |
           set -euo pipefail
           ssh -p "$SSH_PORT" "${DEPLOY_USER}@${DEPLOY_HOST}" \
-            "mkdir -p /srv/apps/${APP_NAME}/repo"
+            "mkdir -p '${REMOTE_APP_DIR}/repo'"
 
       - name: Sync repository
         run: |
@@ -141,7 +168,7 @@ jobs:
           APP_ENV_FILE="${REMOTE_ENV_FILE}"
           STACK_DIR="${REMOTE_STACK_DIR}"
           STACK_COMPOSE="${STACK_DIR}/compose.yaml"
-          LOG_FILE="/srv/platform/logs/deploy-${APP_NAME}.log"
+          LOG_FILE="${APP_DIR}/shared/deploy.log"
           RELEASE_ID="$(date -u +%Y%m%dT%H%M%SZ)"
           RELEASE_DIR="${RELEASES_DIR}/${RELEASE_ID}"
           PREV_TARGET=""
@@ -186,7 +213,7 @@ jobs:
             exit 1
           fi
 
-          mkdir -p "${RELEASE_DIR}"
+          mkdir -p "${RELEASE_DIR}" "$(dirname "${LOG_FILE}")"
 
           {
             echo "[$(date -u +%FT%TZ)] Starting deploy for ${APP_NAME}"
