@@ -263,4 +263,4 @@ jobs:
             CUTOVER_STARTED="false"
             trap - ERR
           } | tee -a "${LOG_FILE}"
-REMOTE_SCRIPT
+          REMOTE_SCRIPT
