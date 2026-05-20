@@ -7,6 +7,8 @@ type RouteContext = {
   params: Promise<{ locale: string }>;
 };
 
+export const dynamic = "force-dynamic";
+
 export async function GET(_request: Request, { params }: RouteContext) {
   const { locale: rawLocale } = await params;
   const locale = normalizePublicLocale(rawLocale);

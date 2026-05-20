@@ -8,6 +8,9 @@
     "clean:ci": "node scripts/clean.cjs --ci",
     "build": "next build",
     "start": "next start",
+    "deploy:preflight": "bash ./scripts/deploy-image-artifact.sh --preflight-only",
+    "deploy:production": "bash ./scripts/deploy-image-artifact.sh",
+    "deploy:production:skip-checks": "bash ./scripts/deploy-image-artifact.sh --skip-checks",
     "lint": "eslint app components constants i18n lib scripts eslint.config.mjs next.config.js postcss.config.js tailwind.config.ts proxy.ts",
     "postinstall": "patch-package"
   },

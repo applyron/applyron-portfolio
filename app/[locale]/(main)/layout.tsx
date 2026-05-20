@@ -7,6 +7,8 @@ import {
   getPublicSocials,
 } from "@/lib/public-data";
 
+export const dynamic = "force-dynamic";
+
 export default async function MainLayout({ children }: PropsWithChildren) {
   const [site, socials, links] = await Promise.all([
     getPublicSiteData(),

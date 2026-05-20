@@ -6,21 +6,12 @@ import type { Metadata } from "next";
 import { ProjectBackButton } from "@/components/sub/project-back-button";
 import { getPublicProjects } from "@/lib/public-data";
 import { buildPublicMetadata, normalizePublicLocale } from "@/lib/seo";
-import { routing } from "@/i18n/routing";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
 
-export const dynamic = "force-static";
-
-export async function generateStaticParams() {
-  const projects = await getPublicProjects();
-
-  return routing.locales.flatMap((locale) =>
-    projects.map((project) => ({ locale, slug: project.slug })),
-  );
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, locale: rawLocale } = await params;

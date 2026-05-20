@@ -49,6 +49,44 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Write release manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          import socket
+          from pathlib import Path
+          from urllib.parse import urlsplit, urlunsplit
+
+          def sanitize_repo_url(value: str) -> str:
+              if not value:
+                  return ""
+              try:
+                  parts = urlsplit(value)
+              except Exception:
+                  return value
+              if parts.scheme in {"http", "https", "ssh"} and "@" in parts.netloc:
+                  return urlunsplit((parts.scheme, parts.netloc.rsplit("@", 1)[1], parts.path, parts.query, parts.fragment))
+              return value
+
+          manifest = {
+              "schema_version": "1",
+              "app": os.environ.get("APP_NAME", "applyron-portfolio"),
+              "repo_url": sanitize_repo_url(f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', '')}.git"),
+              "commit": os.environ.get("GITHUB_SHA", ""),
+              "branch": os.environ.get("GITHUB_REF_NAME", ""),
+              "dirty": False,
+              "release_id": "",
+              "deployed_at_utc": "",
+              "deploy_method": "github-actions",
+              "source_host": os.environ.get("RUNNER_NAME") or socket.gethostname(),
+              "compose_file": f"{os.environ.get('REMOTE_STACK_DIR', '')}/compose.yaml",
+          }
+          Path(".applyron-release.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          PY
+
       - name: Validate deploy configuration
         shell: bash
         run: |
