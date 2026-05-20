@@ -92,6 +92,10 @@ npm run dev
 npm run clean
 ```
 
+`node_modules` dahil daha geniş yerel artefaktları silmek için
+`npm run clean:full` kullanın; ardından bağımlılıkları tekrar kurmak için
+`npm ci` çalıştırın.
+
 Varsayılan yerel adresler:
 
 - `http://localhost:3000/en`

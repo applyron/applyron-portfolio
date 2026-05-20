@@ -10,6 +10,24 @@ const TARGETS = [
   ".eslintcache",
 ];
 
+const FULL_TARGETS = [
+  "node_modules",
+  "build",
+  ".vercel",
+  ".turbo",
+  ".cache",
+  "next-env.d.ts",
+];
+
+const FULL_TOP_LEVEL_PATTERNS = [
+  /\.tsbuildinfo$/,
+  /^npm-debug\.log/,
+  /^yarn-debug\.log/,
+  /^yarn-error\.log/,
+  /^pnpm-debug\.log/,
+  /^lerna-debug\.log/,
+];
+
 const RETRYABLE_ERRORS = new Set(["EBUSY", "ENOTEMPTY", "EPERM"]);
 const RETRY_DELAYS_MS = [150, 300, 600, 1200, 2000];
 
@@ -36,6 +54,26 @@ function buildFailureMessage(target, error, ciMode) {
   ].join(" ");
 }
 
+async function listTopLevelPatternTargets() {
+  const entries = await fs.readdir(process.cwd(), { withFileTypes: true });
+
+  return entries
+    .map((entry) => entry.name)
+    .filter((name) =>
+      FULL_TOP_LEVEL_PATTERNS.some((pattern) => pattern.test(name)),
+    );
+}
+
+async function listTargets(fullMode) {
+  if (!fullMode) {
+    return TARGETS;
+  }
+
+  const patternTargets = await listTopLevelPatternTargets();
+
+  return [...new Set([...TARGETS, ...FULL_TARGETS, ...patternTargets])];
+}
+
 async function removeTarget(target, ciMode) {
   const maxAttempts = ciMode ? 1 : RETRY_DELAYS_MS.length + 1;
 
@@ -59,8 +97,10 @@ async function removeTarget(target, ciMode) {
 
 async function main() {
   const ciMode = process.argv.includes("--ci");
+  const fullMode = process.argv.includes("--full");
+  const targets = await listTargets(fullMode);
 
-  for (const target of TARGETS) {
+  for (const target of targets) {
     await removeTarget(target, ciMode);
   }
 }

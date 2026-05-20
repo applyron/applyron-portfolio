@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --webpack",
     "clean": "node scripts/clean.cjs",
+    "clean:full": "node scripts/clean.cjs --full",
     "clean:ci": "node scripts/clean.cjs --ci",
     "build": "next build",
     "start": "next start",

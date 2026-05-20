@@ -92,6 +92,9 @@ npm run dev
 npm run clean
 ```
 
+Use `npm run clean:full` to also remove broader local artifacts such as
+`node_modules`; reinstall dependencies with `npm ci` afterward.
+
 Default local URLs:
 
 - `http://localhost:3000/en`
